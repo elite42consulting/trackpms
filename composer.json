@@ -1,0 +1,21 @@
+{
+  "name": "elite42/trackpms",
+  "description": "PHP integration library for Track Pulse",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "autoload": {
+	"psr-4": {
+	  "elite42\\trackpms\\": "src/"
+	}
+  },
+  "authors": [
+	{
+	  "name": "Andrew Sauder",
+	  "email": "andrew@sauder.email"
+	}
+  ],
+  "require": {
+	"php": ">=8.0",
+	"guzzlehttp/guzzle": "^7.0"
+  }
+}
