@@ -3,7 +3,6 @@
 namespace elite42\trackpms\types\collection;
 
 
-use elite42\trackpms\types\_envelope;
 use elite42\trackpms\types\collection\unitImage\_embedded;
 use JetBrains\PhpStorm\Pure;
 

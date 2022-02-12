@@ -5,6 +5,6 @@ namespace elite42\trackpms\types;
 /**
  * @see https://developer.trackhs.com/reference/getowner
  */
-class owner {
+class owner extends \andrewsauder\jsonDeserialize\jsonDeserialize {
 
 }

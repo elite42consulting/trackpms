@@ -3,12 +3,11 @@
 namespace elite42\trackpms\types\collection;
 
 
-use elite42\trackpms\types\_envelope;
-use elite42\trackpms\types\collection\customField\_embedded;
+use elite42\trackpms\types\collection\customFields\_embedded;
 use JetBrains\PhpStorm\Pure;
 
 
-class customFieldCollection
+class customFieldsCollection
 	extends
 	_envelope {
 

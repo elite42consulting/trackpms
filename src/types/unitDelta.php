@@ -6,7 +6,7 @@ namespace elite42\trackpms\types;
 /**
  * @see https://developer.trackhs.com/reference/unitsdeltaapi-1
  */
-class unitDelta {
+class unitDelta extends \andrewsauder\jsonDeserialize\jsonDeserialize {
 
 	public \DateTimeImmutable $date;
 

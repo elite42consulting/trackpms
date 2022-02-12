@@ -1,13 +1,15 @@
 <?php
 
-namespace elite42\trackpms\types;
+namespace elite42\trackpms\types\collection;
 
 
 use elite42\trackpms\types\_envelope\_links;
 use JetBrains\PhpStorm\Pure;
 
 
-abstract class _envelope {
+abstract class _envelope
+	extends
+	\andrewsauder\jsonDeserialize\jsonDeserialize {
 
 	public _links $_links;
 

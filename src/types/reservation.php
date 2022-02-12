@@ -6,6 +6,6 @@ namespace elite42\trackpms\types;
 /**
  * @see https://developer.trackhs.com/reference/getreservation
  */
-class reservation {
+class reservation extends \andrewsauder\jsonDeserialize\jsonDeserialize {
 
 }

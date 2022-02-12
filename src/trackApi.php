@@ -1,15 +1,21 @@
 <?php
 namespace elite42\trackpms;
 
+
+use andrewsauder\jsonDeserialize\exceptions\jsonDeserializeException;
+use elite42\trackpms\types\collection\unitCollection;
+use elite42\trackpms\types\unit;
 use GuzzleHttp\Exception\GuzzleException;
+
 
 class trackApi {
 
 	private trackApiSettings $settings;
 
-	private \Monolog\Logger $logger;
+	private \Monolog\Logger  $logger;
 
-	private trackApiCache $cache;
+	private trackApiCache    $cache;
+
 
 	function __construct( trackApiSettings $settings ) {
 		$this->settings = $settings;
@@ -25,10 +31,9 @@ class trackApi {
 			$this->logger->pushHandler( new \Monolog\Handler\StreamHandler( trim( $settings->getDebugLogPath(), '/\\' ) . '/' . $logChannel . '.log', \Monolog\Logger::DEBUG ) );
 		}
 
-		if( $settings->isEnableCaching()){
+		if( $settings->isEnableCaching() ) {
 			$this->cache = new trackApiCache( $settings->getCachePath() );
 		}
-
 	}
 
 
@@ -43,22 +48,27 @@ class trackApi {
 	 * @throws \elite42\trackpms\trackException
 	 */
 	public function call( string $httpMethod, string $apiUrl, array $params = [] ) : mixed {
-
-		$callUrl = $this->settings->getUrl() . $apiUrl;
+		if( str_starts_with( $apiUrl, 'http' ) ) {
+			$callUrl = $apiUrl;
+		}
+		else {
+			$callUrl = $this->settings->getUrl() . $apiUrl;
+		}
 
 		//check the runtime cache and return its value if not null
 		if( $this->settings->isEnableCaching() && strtoupper( $httpMethod ) == 'GET' ) {
 			$cacheResponse = $this->cache->get( 'track', $callUrl, $params );
 			if( $cacheResponse !== null ) {
-				if($this->settings->isDebugLogging()) {
-					$this->logger->debug( $httpMethod . ' [cached]: ' . $apiUrl, $params);
+				if( $this->settings->isDebugLogging() ) {
+					$this->logger->debug( $httpMethod . ' [cached]: ' . $apiUrl, $params );
 				}
+
 				return $cacheResponse;
 			}
 		}
 
-		if($this->settings->isDebugLogging()) {
-			$this->logger->debug( $httpMethod . ': ' . $apiUrl, $params);
+		if( $this->settings->isDebugLogging() ) {
+			$this->logger->debug( $httpMethod . ': ' . $apiUrl, $params );
 		}
 
 		$client = new \GuzzleHttp\Client();
@@ -98,12 +108,11 @@ class trackApi {
 
 			//set api cache
 			if( $this->settings->isEnableCaching() && strtoupper( $httpMethod ) == 'GET' ) {
-				$this->logger->debug( 'Create cache '. $httpMethod . ': ' . $apiUrl, $params);
+				$this->logger->debug( 'Create cache ' . $httpMethod . ': ' . $apiUrl, $params );
 				$this->cache->set( 'track', $callUrl, $params, $body );
 			}
 
 			return $body;
-
 		}
 		catch( GuzzleException $e ) {
 			throw new trackException( $e->getMessage(), $e->getCode(), $e );
@@ -116,13 +125,12 @@ class trackApi {
 
 	/**
 	 * Perform an API call that will follow top level paging 'next' links until all pages have been requested
-	 *
 	 * Returns an array where each value is an API response. Array is returned even if there is only one page of results
 	 *
-	 * @param  string    $httpMethod   HTTP Method to use
-	 * @param  string    $apiUrl       Ex: /pms/units
-	 * @param  string[]  $params       Associative array of parameters to pass as json or query params
-	 * @param  array     $apiResponses Used by the function for recursion - ignore
+	 * @param  string    $httpMethod    HTTP Method to use
+	 * @param  string    $apiUrl        Ex: /pms/units
+	 * @param  string[]  $params        Associative array of parameters to pass as json or query params
+	 * @param  array     $apiResponses  Used by the function for recursion - ignore
 	 *
 	 * @return array
 	 * @throws \elite42\trackpms\trackException
@@ -140,7 +148,69 @@ class trackApi {
 	}
 
 
-	public function getU() {
+	/**
+	 * @param  int  $unitId
+	 *
+	 * @return \elite42\trackpms\types\unit
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getUnit( int $unitId ) : types\unit {
+		$apiResponse = $this->call( 'GET', '/pms/units/' . $unitId );
 
+		try {
+			return unit::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\unit', 500, $e );
+		}
 	}
+
+
+	/**
+	 * @return \elite42\trackpms\types\collection\unitCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getUnits() : array {
+		/** @var \elite42\trackpms\types\collection\unitCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', '/pms/units?size=100' );
+
+		$units = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->units ) ) {
+					foreach( $apiResponse->_embedded?->units as $unit ) {
+						$units[] = unit::jsonDeserialize( $unit );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\unit', 500, $e );
+		}
+
+		return $units;
+	}
+
+
+	/**
+	 * @return \elite42\trackpms\types\collection\unitCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getUnitCollection() : array {
+		$apiResponses = $this->callAndFollowPaging( 'GET', '/pms/units' );
+
+		$unitCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$unitCollections[] = unitCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\unitCollection', 500, $e );
+			}
+		}
+
+		return $unitCollections;
+	}
+
 }
