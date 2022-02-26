@@ -50,6 +50,10 @@ try {
     $customField            = $api->getCustomField( 1 );
 	$customFields           = $api->getCustomFields( [ 'size' => 100 ] );
 	$customFieldCollections = $api->getCustomFieldCollections( [ 'size' => 100 ] );
+	
+	$maintenanceWorkOrder            = $api->getMaintenanceWorkOrder( 3 );
+    $maintenanceWorkOrders           = $api->getMaintenanceWorkOrders( [ 'size' => 100 ] );
+    $maintenanceWorkOrderCollections = $api->getMaintenanceWorkOrderCollections( [ 'size' => 100 ] );
 }
 catch( \elite42\trackpms\trackException $e ) {
     throw new controllerException( 'Error while running API command: '.$e->getMessage(), 400, $e);
@@ -57,9 +61,9 @@ catch( \elite42\trackpms\trackException $e ) {
 ```
 ---
 
-##Methods
+## Methods
 
-###Units
+### Units
 | Fetch        | API Method                                                                               |
 |--------------|------------------------------------------------------------------------------------------|
 | One Unit     | `$api->getUnit( int $unitId )`                                                           |
@@ -70,7 +74,7 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 
 ---
 
-###Reservations
+### Reservations
 | Fetch             | API Method                                                                                      |
 |-------------------|-------------------------------------------------------------------------------------------------|
 | One Reservation   | `$api->getReservation( int $reservationId )`                                                    |
@@ -81,7 +85,7 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 
 ---
 
-###Amenities
+### Amenities
 | Fetch          | API Method                                                                                  |
 |----------------|---------------------------------------------------------------------------------------------|
 | One Amenity    | `$api->getAmenity( int $amenityId )`                                                        |
@@ -92,7 +96,7 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 
 ---
 
-###Amenity Groups
+### Amenity Groups
 | Fetch               | API Method                                                                                       |
 |---------------------|--------------------------------------------------------------------------------------------------|
 | One Amenity Group   | `$api->getAmenityGroup( int $amenityGroupId )`                                                   |
@@ -103,7 +107,7 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 
 ---
 
-###Custom Fields
+### Custom Fields
 | Fetch              | API Method                                                                                      |
 |--------------------|-------------------------------------------------------------------------------------------------|
 | One Custom Field   | `$api->getCustomField( int $customFieldId )`                                                    |
@@ -114,7 +118,18 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 
 ---
 
-###Manual Call to Track API
+### Maintenance Work Orders
+| Fetch      | API Method                                                                                               |
+|------------|----------------------------------------------------------------------------------------------------------|
+| One        | `$api->getMaintenanceWorkOrder( int $maintenanceWorkOrderId )`                                           |
+| Many       | `$api->getMaintenanceWorkOrders( array $queryParams )`                                                   |
+| Collection | `$api->getMaintenanceWorkOrderCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getmaintworkorders
+
+---
+
+### Manual Call to Track API
 | Fetch              | API Method                                                                                    |
 |--------------------|-----------------------------------------------------------------------------------------------|
 | Call Once Only     | `$api->call( string $httpMethod, string $apiUrl, array $bodyParams=[] )`                      |

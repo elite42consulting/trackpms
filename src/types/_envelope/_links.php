@@ -47,4 +47,10 @@ class _links
 
 	public ?link $amenities = null;
 
+	public ?link $contacts  = null;
+
+	public ?link $tasks     = null;
+
+	public ?link $process   = null;
+
 }

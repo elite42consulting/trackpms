@@ -8,9 +8,11 @@ use elite42\trackpms\types\amenityGroup;
 use elite42\trackpms\types\collection\amenityCollection;
 use elite42\trackpms\types\collection\amenityGroupCollection;
 use elite42\trackpms\types\collection\customFieldCollection;
+use elite42\trackpms\types\collection\maintenanceWorkOrderCollection;
 use elite42\trackpms\types\collection\reservationCollection;
 use elite42\trackpms\types\collection\unitCollection;
 use elite42\trackpms\types\customField;
+use elite42\trackpms\types\maintenanceWorkOrder;
 use elite42\trackpms\types\reservation;
 use elite42\trackpms\types\unit;
 use GuzzleHttp\Exception\GuzzleException;
@@ -554,6 +556,81 @@ class trackApi {
 		}
 
 		return $customFieldCollections;
+	}
+
+	/**
+	 * @param  int  $maintenanceWorkOrderId
+	 *
+	 * @return \elite42\trackpms\types\maintenanceWorkOrder
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getMaintenanceWorkOrder( int $maintenanceWorkOrderId ) : maintenanceWorkOrder {
+		$url = $this->buildUrl( '/pms/maintenance/work-orders/' . $maintenanceWorkOrderId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return maintenanceWorkOrder::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\maintenanceWorkOrder', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunitmaintenanceWorkOrderGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\maintenanceWorkOrder[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getMaintenanceWorkOrders( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/maintenance/work-orders', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\maintenanceWorkOrderCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$maintenanceWorkOrders = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->workOrders ) ) {
+					foreach( $apiResponse->_embedded?->workOrders as $maintenanceWorkOrder ) {
+						$maintenanceWorkOrders[] = maintenanceWorkOrder::jsonDeserialize( $maintenanceWorkOrder );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\maintenanceWorkOrder', 500, $e );
+		}
+
+		return $maintenanceWorkOrders;
+	}
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getmaintenanceWorkOrderGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\maintenanceWorkOrderCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getMaintenanceWorkOrderCollections( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/maintenance/work-orders', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$maintenanceWorkOrderCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$maintenanceWorkOrderCollections[] = maintenanceWorkOrderCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\maintenanceWorkOrderCollection', 500, $e );
+			}
+		}
+
+		return $maintenanceWorkOrderCollections;
 	}
 
 }

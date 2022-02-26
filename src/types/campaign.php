@@ -49,6 +49,7 @@ class campaign
 
 	public string                                    $keywords          = '';
 
+	//TODO: add array type
 	public array                                     $tags              = [];
 
 	public ?\elite42\trackpms\types\_envelope\_links $_links            = null;
