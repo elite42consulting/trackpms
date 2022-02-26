@@ -38,6 +38,14 @@ try {
     $reservation            = $api->getReservation( 1 );
     $reservations           = $api->getReservations( [ 'size' => 100 ] );
     $reservationCollections = $api->getReservationCollections( [ 'size' => 100 ] );
+    
+    $amenity = $api->getAmenity( 1 );
+    $amenities = $api->getAmenities( [ 'size' => 100 ] );
+    $amenityCollections = $api->getAmenityCollections( [ 'size' => 100 ] );
+    
+    $amenityGroup = $api->getAmenityGroup( 1 );
+    $amenityGroups = $api->getAmenityGroups( [ 'size' => 100 ] );
+    $amenityGroupCollections = $api->getAmenityGroupCollections( [ 'size' => 100 ] );
 }
 catch( \elite42\trackpms\trackException $e ) {
     throw new controllerException( 'Error while running API command: '.$e->getMessage(), 400, $e);
@@ -66,6 +74,28 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 | Collection       | `$api->getReservationCollections( array $queryParams )`<br/>*Provides full paged API responses* |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getreservations
+
+---
+
+###Amenities
+| Fetch            | API Method                                                                                   |
+|------------------|----------------------------------------------------------------------------------------------|
+| One Reservation  | `$api->getAmenity( int $reservationId )`                                                     |
+| Many Reservation | `$api->getAmenities( array $queryParams )`                                                   |
+| Collection       | `$api->getAmenityCollections( array $queryParams )`<br/>*Provides full paged API responses*  |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getunitamenities
+
+---
+
+###Amenity Groups
+| Fetch            | API Method                                                                                       |
+|------------------|--------------------------------------------------------------------------------------------------|
+| One Reservation  | `$api->getAmenityGroup( int $reservationId )`                                                    |
+| Many Reservation | `$api->getAmenityGroups( array $queryParams )`                                                   |
+| Collection       | `$api->getAmenityGroupCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getunitamenitygroups
 
 ---
 

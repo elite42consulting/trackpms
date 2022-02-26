@@ -3,6 +3,10 @@ namespace elite42\trackpms;
 
 
 use andrewsauder\jsonDeserialize\exceptions\jsonDeserializeException;
+use elite42\trackpms\types\amenity;
+use elite42\trackpms\types\amenityGroup;
+use elite42\trackpms\types\collection\amenityCollection;
+use elite42\trackpms\types\collection\amenityGroupCollection;
 use elite42\trackpms\types\collection\reservationCollection;
 use elite42\trackpms\types\collection\unitCollection;
 use elite42\trackpms\types\reservation;
@@ -19,7 +23,7 @@ class trackApi {
 	private trackApiCache    $cache;
 
 
-	function __construct( trackApiSettings $settings ) {
+	public function __construct( trackApiSettings $settings ) {
 		$this->settings = $settings;
 
 		//log setup
@@ -33,8 +37,9 @@ class trackApi {
 			$this->logger->pushHandler( new \Monolog\Handler\StreamHandler( trim( $settings->getDebugLogPath(), '/\\' ) . '/' . $logChannel . '.log', \Monolog\Logger::DEBUG ) );
 
 			//enable debugging on json deserialize
-			\andrewsauder\jsonDeserialize\config::setDebugLogging( true );
 			\andrewsauder\jsonDeserialize\config::setDebugLogPath( $settings->getDebugLogPath() );
+			\andrewsauder\jsonDeserialize\config::setDebugLogging( true );
+			\andrewsauder\jsonDeserialize\config::setLogJsonMissingProperty( false );
 		}
 
 		if( $settings->isEnableCaching() ) {
@@ -42,6 +47,20 @@ class trackApi {
 		}
 	}
 
+	private function buildUrl( string $url, array $queryParams=[] ) : string {
+		$finalUrl = $url;
+
+		if(count($queryParams)>0) {
+			$appendJoiner = '?';
+			if(str_contains($url, '?')) {
+				$appendJoiner = '&';
+			}
+
+			$finalUrl .= $appendJoiner . implode('&', $queryParams );
+		}
+
+		return $finalUrl;
+	}
 
 	/**
 	 * Perform a single API call
@@ -161,7 +180,9 @@ class trackApi {
 	 * @throws \elite42\trackpms\trackException
 	 */
 	public function getUnit( int $unitId ) : types\unit {
-		$apiResponse = $this->call( 'GET', '/pms/units/' . $unitId );
+		$url = $this->buildUrl( '/pms/units/' . $unitId );
+
+		$apiResponse = $this->call( 'GET', $url );
 
 		try {
 			return unit::jsonDeserialize( $apiResponse );
@@ -179,11 +200,7 @@ class trackApi {
 	 * @throws \elite42\trackpms\trackException
 	 */
 	public function getUnits( array $queryParams=[] ) : array {
-
-		$url = '/pms/units';
-		if(count($queryParams)>0) {
-			$url .= '?' . implode('&', $queryParams );
-		}
+		$url = $this->buildUrl( '/pms/units', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\unitCollection[] $apiResponses */
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -213,11 +230,7 @@ class trackApi {
 	 * @throws \elite42\trackpms\trackException
 	 */
 	public function getUnitCollections( array $queryParams=[] ) : array {
-
-		$url = '/pms/units';
-		if(count($queryParams)>0) {
-			$url .= '?' . implode('&', $queryParams );
-		}
+		$url = $this->buildUrl( '/pms/units', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
 
@@ -242,7 +255,9 @@ class trackApi {
 	 * @throws \elite42\trackpms\trackException
 	 */
 	public function getReservation( int $reservationId ) : types\reservation {
-		$apiResponse = $this->call( 'GET', '/pms/reservations/' . $reservationId );
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId );
+
+		$apiResponse = $this->call( 'GET', $url );
 
 		try {
 			return reservation::jsonDeserialize( $apiResponse );
@@ -260,11 +275,7 @@ class trackApi {
 	 * @throws \elite42\trackpms\trackException
 	 */
 	public function getReservations( array $queryParams=[] ) : array {
-
-		$url = '/pms/reservations';
-		if(count($queryParams)>0) {
-			$url .= '?' . implode('&', $queryParams );
-		}
+		$url = $this->buildUrl( '/pms/reservations', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\reservationCollection[] $apiResponses */
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -294,7 +305,9 @@ class trackApi {
 	 * @throws \elite42\trackpms\trackException
 	 */
 	public function getReservationCollections( array $queryParams=[] ) : array {
-		$apiResponses = $this->callAndFollowPaging( 'GET', '/pms/reservations' );
+		$url = $this->buildUrl( '/pms/reservations', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
 
 		$reservationCollections = [];
 
@@ -308,6 +321,155 @@ class trackApi {
 		}
 
 		return $reservationCollections;
+	}
+
+	/**
+	 * @param  int  $amenityId
+	 *
+	 * @return \elite42\trackpms\types\amenity
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getAmenity( int $amenityId ) : types\amenity {
+		$url = $this->buildUrl( '/pms/units/amenities/' . $amenityId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return amenity::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\amenity', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenities. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\amenity[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getAmenities( array $queryParams=[] ) : array {
+		$url = $this->buildUrl( '/pms/units/amenities', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\amenityCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$amenities = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->amenities ) ) {
+					foreach( $apiResponse->_embedded?->amenities as $amenity ) {
+						$amenities[] = amenity::jsonDeserialize( $amenity );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\amenity', 500, $e );
+		}
+
+		return $amenities;
+	}
+
+
+	/**
+	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getamenities. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\amenityCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getAmenityCollections( array $queryParams=[] ) : array {
+		$url = $this->buildUrl( '/pms/units/amenities', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$amenityCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$amenityCollections[] = amenityCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\amenityCollection', 500, $e );
+			}
+		}
+
+		return $amenityCollections;
+	}
+	/**
+	 * @param  int  $amenityGroupId
+	 *
+	 * @return \elite42\trackpms\types\amenityGroup
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getAmenityGroup( int $amenityGroupId ) : types\amenityGroup {
+		$url = $this->buildUrl( '/pms/units/amenity-groups/' . $amenityGroupId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return amenityGroup::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\amenityGroup', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenityGroupGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\amenityGroup[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getAmenityGroups( array $queryParams=[] ) : array {
+		$url = $this->buildUrl( '/pms/units/amenity-groups', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\amenityGroupCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$amenityGroupGroups = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->amenitiesCategory ) ) {
+					foreach( $apiResponse->_embedded?->amenitiesCategory as $amenityGroup ) {
+						$amenityGroupGroups[] = amenityGroup::jsonDeserialize( $amenityGroup );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\amenityGroup', 500, $e );
+		}
+
+		return $amenityGroupGroups;
+	}
+
+
+	/**
+	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getamenityGroupGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\amenityGroupCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getAmenityGroupCollections( array $queryParams=[] ) : array {
+		$url = $this->buildUrl( '/pms/units/amenity-groups', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$amenityGroupCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$amenityGroupCollections[] = amenityGroupCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\amenityGroupCollection', 500, $e );
+			}
+		}
+
+		return $amenityGroupCollections;
 	}
 
 }
