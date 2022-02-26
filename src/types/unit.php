@@ -148,6 +148,8 @@ class unit
 	public bool                                                     $useRoomConfiguration     = false;
 
 	public bool                                                     $isBookable               = false;
+	public bool                                                     $isLimited               = false;
+	public bool                                                     $folioException               = false;
 
 	public ?\DateTimeImmutable                                      $checkinTime              = null;
 
@@ -156,6 +158,8 @@ class unit
 	public ?\DateTimeImmutable                                      $earlyCheckinTime         = null;
 
 	public ?\DateTimeImmutable                                      $lateCheckoutTime         = null;
+
+	public float                                                    $securityDeposit  = 0;
 
 	/** @var \elite42\trackpms\types\unit\unitRole[] */
 	public array $roles = [];

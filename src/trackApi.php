@@ -3,7 +3,9 @@ namespace elite42\trackpms;
 
 
 use andrewsauder\jsonDeserialize\exceptions\jsonDeserializeException;
+use elite42\trackpms\types\collection\reservationCollection;
 use elite42\trackpms\types\collection\unitCollection;
+use elite42\trackpms\types\reservation;
 use elite42\trackpms\types\unit;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -29,6 +31,10 @@ class trackApi {
 
 			// save the log entries to a file
 			$this->logger->pushHandler( new \Monolog\Handler\StreamHandler( trim( $settings->getDebugLogPath(), '/\\' ) . '/' . $logChannel . '.log', \Monolog\Logger::DEBUG ) );
+
+			//enable debugging on json deserialize
+			\andrewsauder\jsonDeserialize\config::setDebugLogging( true );
+			\andrewsauder\jsonDeserialize\config::setDebugLogPath( $settings->getDebugLogPath() );
 		}
 
 		if( $settings->isEnableCaching() ) {
@@ -167,12 +173,20 @@ class trackApi {
 
 
 	/**
-	 * @return \elite42\trackpms\types\collection\unitCollection[]
+	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getunits
+	 *
+	 * @return \elite42\trackpms\types\unit[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnits() : array {
+	public function getUnits( array $queryParams=[] ) : array {
+
+		$url = '/pms/units';
+		if(count($queryParams)>0) {
+			$url .= '?' . implode('&', $queryParams );
+		}
+
 		/** @var \elite42\trackpms\types\collection\unitCollection[] $apiResponses */
-		$apiResponses = $this->callAndFollowPaging( 'GET', '/pms/units?size=100' );
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
 
 		$units = [];
 		try {
@@ -193,11 +207,19 @@ class trackApi {
 
 
 	/**
+	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getunits
+	 *
 	 * @return \elite42\trackpms\types\collection\unitCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnitCollection() : array {
-		$apiResponses = $this->callAndFollowPaging( 'GET', '/pms/units' );
+	public function getUnitCollections( array $queryParams=[] ) : array {
+
+		$url = '/pms/units';
+		if(count($queryParams)>0) {
+			$url .= '?' . implode('&', $queryParams );
+		}
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
 
 		$unitCollections = [];
 
@@ -211,6 +233,81 @@ class trackApi {
 		}
 
 		return $unitCollections;
+	}
+
+	/**
+	 * @param  int  $reservationId
+	 *
+	 * @return \elite42\trackpms\types\reservation
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservation( int $reservationId ) : types\reservation {
+		$apiResponse = $this->call( 'GET', '/pms/reservations/' . $reservationId );
+
+		try {
+			return reservation::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservation', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservations. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\reservation[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservations( array $queryParams=[] ) : array {
+
+		$url = '/pms/reservations';
+		if(count($queryParams)>0) {
+			$url .= '?' . implode('&', $queryParams );
+		}
+
+		/** @var \elite42\trackpms\types\collection\reservationCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$reservations = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->reservations ) ) {
+					foreach( $apiResponse->_embedded?->reservations as $reservation ) {
+						$reservations[] = reservation::jsonDeserialize( $reservation );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservation', 500, $e );
+		}
+
+		return $reservations;
+	}
+
+
+	/**
+	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservations. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\reservationCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationCollections( array $queryParams=[] ) : array {
+		$apiResponses = $this->callAndFollowPaging( 'GET', '/pms/reservations' );
+
+		$reservationCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$reservationCollections[] = reservationCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationCollection', 500, $e );
+			}
+		}
+
+		return $reservationCollections;
 	}
 
 }
