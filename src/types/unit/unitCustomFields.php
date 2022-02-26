@@ -1,12 +1,12 @@
 <?php
 
-namespace elite42\trackpms\types;
+namespace elite42\trackpms\types\unit;
 
 
 /**
  * @see https://developer.trackhs.com/reference/getcustomfield
  */
-class customFields
+class unitCustomFields
 	extends
 	\andrewsauder\jsonDeserialize\jsonDeserialize {
 

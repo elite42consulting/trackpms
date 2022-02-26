@@ -43,9 +43,13 @@ try {
     $amenities = $api->getAmenities( [ 'size' => 100 ] );
     $amenityCollections = $api->getAmenityCollections( [ 'size' => 100 ] );
     
-    $amenityGroup = $api->getAmenityGroup( 1 );
-    $amenityGroups = $api->getAmenityGroups( [ 'size' => 100 ] );
+    $amenityGroup            = $api->getAmenityGroup( 1 );
+    $amenityGroups           = $api->getAmenityGroups( [ 'size' => 100 ] );
     $amenityGroupCollections = $api->getAmenityGroupCollections( [ 'size' => 100 ] );
+    
+    $customField            = $api->getCustomField( 1 );
+	$customFields           = $api->getCustomFields( [ 'size' => 100 ] );
+	$customFieldCollections = $api->getCustomFieldCollections( [ 'size' => 100 ] );
 }
 catch( \elite42\trackpms\trackException $e ) {
     throw new controllerException( 'Error while running API command: '.$e->getMessage(), 400, $e);
@@ -57,45 +61,56 @@ catch( \elite42\trackpms\trackException $e ) {
 
 ###Units
 | Fetch        | API Method                                                                               |
-|-------------|------------------------------------------------------------------------------------------|
-| One Unit    | `$api->getUnit( int $unitId )`                                                           |
-| Many Units  | `$api->getUnits( array $queryParams )`                                                   |
-| Collection  | `$api->getUnitCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+|--------------|------------------------------------------------------------------------------------------|
+| One Unit     | `$api->getUnit( int $unitId )`                                                           |
+| Many Units   | `$api->getUnits( array $queryParams )`                                                   |
+| Collection   | `$api->getUnitCollections( array $queryParams )`<br/>*Provides full paged API responses* |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getunits
 
 ---
 
 ###Reservations
-| Fetch            | API Method                                                                                      |
-|------------------|-------------------------------------------------------------------------------------------------|
-| One Reservation  | `$api->getReservation( int $reservationId )`                                                    |
-| Many Reservation | `$api->getReservations( array $queryParams )`                                                   |
-| Collection       | `$api->getReservationCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+| Fetch             | API Method                                                                                      |
+|-------------------|-------------------------------------------------------------------------------------------------|
+| One Reservation   | `$api->getReservation( int $reservationId )`                                                    |
+| Many Reservations | `$api->getReservations( array $queryParams )`                                                   |
+| Collection        | `$api->getReservationCollections( array $queryParams )`<br/>*Provides full paged API responses* |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getreservations
 
 ---
 
 ###Amenities
-| Fetch            | API Method                                                                                   |
-|------------------|----------------------------------------------------------------------------------------------|
-| One Reservation  | `$api->getAmenity( int $reservationId )`                                                     |
-| Many Reservation | `$api->getAmenities( array $queryParams )`                                                   |
-| Collection       | `$api->getAmenityCollections( array $queryParams )`<br/>*Provides full paged API responses*  |
+| Fetch          | API Method                                                                                  |
+|----------------|---------------------------------------------------------------------------------------------|
+| One Amenity    | `$api->getAmenity( int $amenityId )`                                                        |
+| Many Amenities | `$api->getAmenities( array $queryParams )`                                                  |
+| Collection     | `$api->getAmenityCollections( array $queryParams )`<br/>*Provides full paged API responses* |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getunitamenities
 
 ---
 
 ###Amenity Groups
-| Fetch            | API Method                                                                                       |
-|------------------|--------------------------------------------------------------------------------------------------|
-| One Reservation  | `$api->getAmenityGroup( int $reservationId )`                                                    |
-| Many Reservation | `$api->getAmenityGroups( array $queryParams )`                                                   |
-| Collection       | `$api->getAmenityGroupCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+| Fetch               | API Method                                                                                       |
+|---------------------|--------------------------------------------------------------------------------------------------|
+| One Amenity Group   | `$api->getAmenityGroup( int $amenityGroupId )`                                                   |
+| Many Amenity Group  | `$api->getAmenityGroups( array $queryParams )`                                                   |
+| Collection          | `$api->getAmenityGroupCollections( array $queryParams )`<br/>*Provides full paged API responses* |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getunitamenitygroups
+
+---
+
+###Custom Fields
+| Fetch              | API Method                                                                                      |
+|--------------------|-------------------------------------------------------------------------------------------------|
+| One Custom Field   | `$api->getCustomField( int $customFieldId )`                                                    |
+| Many Custom Fields | `$api->getCustomFields( array $queryParams )`                                                   |
+| Collection         | `$api->getCustomFieldCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getcustomfields
 
 ---
 

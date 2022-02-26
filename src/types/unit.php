@@ -3,9 +3,6 @@
 namespace elite42\trackpms\types;
 
 
-use JetBrains\PhpStorm\Pure;
-
-
 /**
  * @see https://developer.trackhs.com/reference/getchannelunit
  */
@@ -148,8 +145,10 @@ class unit
 	public bool                                                     $useRoomConfiguration     = false;
 
 	public bool                                                     $isBookable               = false;
-	public bool                                                     $isLimited               = false;
-	public bool                                                     $folioException               = false;
+
+	public bool                                                     $isLimited                = false;
+
+	public bool                                                     $folioException           = false;
 
 	public ?\DateTimeImmutable                                      $checkinTime              = null;
 
@@ -159,33 +158,31 @@ class unit
 
 	public ?\DateTimeImmutable                                      $lateCheckoutTime         = null;
 
-	public float                                                    $securityDeposit  = 0;
+	public float                                                    $securityDeposit          = 0;
 
 	/** @var \elite42\trackpms\types\unit\unitRole[] */
 	public array $roles = [];
 
 	/** @var \elite42\trackpms\types\unit\unitComposite[] */
-	public array $composites         = [];
+	public array                         $composites         = [];
 
-	public ?int  $unitTypeId         = null;
+	public ?int                          $unitTypeId         = null;
 
-	public ?int  $housekeepingZoneId = null;
+	public ?int                          $housekeepingZoneId = null;
 
-	/** @var ?\elite42\trackpms\types\zone */
-	public ?\elite42\trackpms\types\zone $housekeepingZone  = null;
+	public ?\elite42\trackpms\types\zone $housekeepingZone   = null;
 
-	public ?int                          $maintenanceZoneId = null;
+	public ?int                          $maintenanceZoneId  = null;
 
-	/** @var ?\elite42\trackpms\types\zone */
-	public ?\elite42\trackpms\types\zone $maintenanceZone = null;
+	public ?\elite42\trackpms\types\zone $maintenanceZone    = null;
 
 	/** @var \elite42\trackpms\types\unit\unitBedType[] */
 	public array $bedTypes = [];
 
 	/** @var \elite42\trackpms\types\unit\unitRoom[] */
-	public array                                 $rooms  = [];
+	public array                                      $rooms  = [];
 
-	public ?\elite42\trackpms\types\customFields $custom = null;
+	public ?\elite42\trackpms\types\unit\unitCustomFields $custom = null;
 
 	/** @var int[] */
 	public array $guaranteePoliciesIds = [];
@@ -197,10 +194,10 @@ class unit
 	public array $documentsIds = [];
 
 	/** @var int[] */
-	public array                                     $gatewaysIds = [];
+	public array                                      $gatewaysIds = [];
 
 	public ?\elite42\trackpms\types\unit\unitEmbedded $_embedded   = null;
 
-	public ?\elite42\trackpms\types\_envelope\_links $_links      = null;
+	public ?\elite42\trackpms\types\_envelope\_links  $_links      = null;
 
 }

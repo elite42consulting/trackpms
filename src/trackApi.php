@@ -7,8 +7,10 @@ use elite42\trackpms\types\amenity;
 use elite42\trackpms\types\amenityGroup;
 use elite42\trackpms\types\collection\amenityCollection;
 use elite42\trackpms\types\collection\amenityGroupCollection;
+use elite42\trackpms\types\collection\customFieldCollection;
 use elite42\trackpms\types\collection\reservationCollection;
 use elite42\trackpms\types\collection\unitCollection;
+use elite42\trackpms\types\customField;
 use elite42\trackpms\types\reservation;
 use elite42\trackpms\types\unit;
 use GuzzleHttp\Exception\GuzzleException;
@@ -47,20 +49,22 @@ class trackApi {
 		}
 	}
 
-	private function buildUrl( string $url, array $queryParams=[] ) : string {
+
+	private function buildUrl( string $url, array $queryParams = [] ) : string {
 		$finalUrl = $url;
 
-		if(count($queryParams)>0) {
+		if( count( $queryParams ) > 0 ) {
 			$appendJoiner = '?';
-			if(str_contains($url, '?')) {
+			if( str_contains( $url, '?' ) ) {
 				$appendJoiner = '&';
 			}
 
-			$finalUrl .= $appendJoiner . implode('&', $queryParams );
+			$finalUrl .= $appendJoiner . http_build_query($queryParams);
 		}
 
 		return $finalUrl;
 	}
+
 
 	/**
 	 * Perform a single API call
@@ -194,12 +198,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getunits
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunits
 	 *
 	 * @return \elite42\trackpms\types\unit[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnits( array $queryParams=[] ) : array {
+	public function getUnits( array $queryParams = [] ) : array {
 		$url = $this->buildUrl( '/pms/units', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\unitCollection[] $apiResponses */
@@ -224,12 +228,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getunits
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunits
 	 *
 	 * @return \elite42\trackpms\types\collection\unitCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnitCollections( array $queryParams=[] ) : array {
+	public function getUnitCollections( array $queryParams = [] ) : array {
 		$url = $this->buildUrl( '/pms/units', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -247,6 +251,7 @@ class trackApi {
 
 		return $unitCollections;
 	}
+
 
 	/**
 	 * @param  int  $reservationId
@@ -269,12 +274,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservations. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getreservations. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\reservation[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservations( array $queryParams=[] ) : array {
+	public function getReservations( array $queryParams = [] ) : array {
 		$url = $this->buildUrl( '/pms/reservations', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\reservationCollection[] $apiResponses */
@@ -299,12 +304,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservations. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getreservations. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\reservationCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservationCollections( array $queryParams=[] ) : array {
+	public function getReservationCollections( array $queryParams = [] ) : array {
 		$url = $this->buildUrl( '/pms/reservations', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -322,6 +327,7 @@ class trackApi {
 
 		return $reservationCollections;
 	}
+
 
 	/**
 	 * @param  int  $amenityId
@@ -344,12 +350,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenities. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenities. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\amenity[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getAmenities( array $queryParams=[] ) : array {
+	public function getAmenities( array $queryParams = [] ) : array {
 		$url = $this->buildUrl( '/pms/units/amenities', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\amenityCollection[] $apiResponses */
@@ -374,12 +380,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getamenities. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getamenities. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\amenityCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getAmenityCollections( array $queryParams=[] ) : array {
+	public function getAmenityCollections( array $queryParams = [] ) : array {
 		$url = $this->buildUrl( '/pms/units/amenities', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -397,6 +403,8 @@ class trackApi {
 
 		return $amenityCollections;
 	}
+
+
 	/**
 	 * @param  int  $amenityGroupId
 	 *
@@ -418,12 +426,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenityGroupGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenityGroupGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\amenityGroup[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getAmenityGroups( array $queryParams=[] ) : array {
+	public function getAmenityGroups( array $queryParams = [] ) : array {
 		$url = $this->buildUrl( '/pms/units/amenity-groups', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\amenityGroupCollection[] $apiResponses */
@@ -448,12 +456,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getamenityGroupGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getamenityGroupGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\amenityGroupCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getAmenityGroupCollections( array $queryParams=[] ) : array {
+	public function getAmenityGroupCollections( array $queryParams = [] ) : array {
 		$url = $this->buildUrl( '/pms/units/amenity-groups', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -470,6 +478,82 @@ class trackApi {
 		}
 
 		return $amenityGroupCollections;
+	}
+
+
+	/**
+	 * @param  int  $customFieldId
+	 *
+	 * @return \elite42\trackpms\types\customField
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getCustomField( int $customFieldId ) : customField {
+		$url = $this->buildUrl( '/custom-fields/' . $customFieldId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return customField::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\customField', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunitcustomFieldGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\customField[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getCustomFields( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/custom-fields', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\customFieldCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$customFields = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->customFields ) ) {
+					foreach( $apiResponse->_embedded?->customFields as $customField ) {
+						$customFields[] = customField::jsonDeserialize( $customField );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\customField', 500, $e );
+		}
+
+		return $customFields;
+	}
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcustomFieldGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\customFieldCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getCustomFieldCollections( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/custom-fields', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$customFieldCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$customFieldCollections[] = customFieldCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\customFieldCollection', 500, $e );
+			}
+		}
+
+		return $customFieldCollections;
 	}
 
 }

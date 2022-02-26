@@ -63,7 +63,7 @@ class contact
 	/** @var \elite42\trackpms\types\contact\reference[] */
 	public array                                     $references = [];
 
-	public array                                     $custom     = [];
+//	public array                                     $custom     = [];
 
 	public ?\DateTimeImmutable                       $createdAt  = null;
 
