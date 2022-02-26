@@ -9,10 +9,12 @@ use elite42\trackpms\types\collection\amenityCollection;
 use elite42\trackpms\types\collection\amenityGroupCollection;
 use elite42\trackpms\types\collection\customFieldCollection;
 use elite42\trackpms\types\collection\maintenanceWorkOrderCollection;
+use elite42\trackpms\types\collection\ownerCollection;
 use elite42\trackpms\types\collection\reservationCollection;
 use elite42\trackpms\types\collection\unitCollection;
 use elite42\trackpms\types\customField;
 use elite42\trackpms\types\maintenanceWorkOrder;
+use elite42\trackpms\types\owner;
 use elite42\trackpms\types\reservation;
 use elite42\trackpms\types\unit;
 use GuzzleHttp\Exception\GuzzleException;
@@ -61,7 +63,7 @@ class trackApi {
 				$appendJoiner = '&';
 			}
 
-			$finalUrl .= $appendJoiner . http_build_query($queryParams);
+			$finalUrl .= $appendJoiner . http_build_query( $queryParams );
 		}
 
 		return $finalUrl;
@@ -428,7 +430,7 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenityGroupGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenitygroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\amenityGroup[]
 	 * @throws \elite42\trackpms\trackException
@@ -458,7 +460,7 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getamenityGroupGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenitygroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\amenityGroupCollection[]
 	 * @throws \elite42\trackpms\trackException
@@ -504,7 +506,7 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunitcustomFieldGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcustomfields. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\customField[]
 	 * @throws \elite42\trackpms\trackException
@@ -534,7 +536,7 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcustomFieldGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcustomfields. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\customFieldCollection[]
 	 * @throws \elite42\trackpms\trackException
@@ -558,6 +560,7 @@ class trackApi {
 		return $customFieldCollections;
 	}
 
+
 	/**
 	 * @param  int  $maintenanceWorkOrderId
 	 *
@@ -579,7 +582,7 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunitmaintenanceWorkOrderGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getmaintworkorders. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\maintenanceWorkOrder[]
 	 * @throws \elite42\trackpms\trackException
@@ -609,7 +612,7 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getmaintenanceWorkOrderGroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getmaintworkorders. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\maintenanceWorkOrderCollection[]
 	 * @throws \elite42\trackpms\trackException
@@ -631,6 +634,82 @@ class trackApi {
 		}
 
 		return $maintenanceWorkOrderCollections;
+	}
+
+
+	/**
+	 * @param  int  $ownerId
+	 *
+	 * @return \elite42\trackpms\types\owner
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getOwner( int $ownerId ) : owner {
+		$url = $this->buildUrl( '/pms/owners/' . $ownerId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return owner::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\owner', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getownercollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\owner[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getOwners( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/owners', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\ownerCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$owners = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->owners ) ) {
+					foreach( $apiResponse->_embedded?->owners as $owner ) {
+						$owners[] = owner::jsonDeserialize( $owner );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\owner', 500, $e );
+		}
+
+		return $owners;
+	}
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getownercollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\ownerCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getOwnerCollections( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/owners', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$ownerCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$ownerCollections[] = ownerCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\ownerCollection', 500, $e );
+			}
+		}
+
+		return $ownerCollections;
 	}
 
 }

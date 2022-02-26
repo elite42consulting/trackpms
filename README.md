@@ -54,6 +54,10 @@ try {
 	$maintenanceWorkOrder            = $api->getMaintenanceWorkOrder( 3 );
     $maintenanceWorkOrders           = $api->getMaintenanceWorkOrders( [ 'size' => 100 ] );
     $maintenanceWorkOrderCollections = $api->getMaintenanceWorkOrderCollections( [ 'size' => 100 ] );
+    
+    $owner            = $api->getOwner( 1000 );
+    $owners           = $api->getOwners( [ 'size' => 100 ] );
+    $ownerCollections = $api->getOwnerCollections( [ 'size' => 100 ] );
 }
 catch( \elite42\trackpms\trackException $e ) {
     throw new controllerException( 'Error while running API command: '.$e->getMessage(), 400, $e);
@@ -126,6 +130,17 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 | Collection | `$api->getMaintenanceWorkOrderCollections( array $queryParams )`<br/>*Provides full paged API responses* |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getmaintworkorders
+
+---
+
+### Owners
+| Fetch      | API Method                                                                                |
+|------------|-------------------------------------------------------------------------------------------|
+| One        | `$api->getOwner( int $ownerId )`                                                          |
+| Many       | `$api->getOwnerOrders( array $queryParams )`                                              |
+| Collection | `$api->getOwnerCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getownercollection
 
 ---
 
