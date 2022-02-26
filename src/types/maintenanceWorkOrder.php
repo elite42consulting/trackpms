@@ -64,7 +64,7 @@ class maintenanceWorkOrder
 	public ?int  $ownerId   = null;
 
 	//TODO: add type and uncomment
-	//public string $owner = null;
+	//public string $ownerUnit = null;
 
 	public ?int                                                                       $reservationId = null;
 

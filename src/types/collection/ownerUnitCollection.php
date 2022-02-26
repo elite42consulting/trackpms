@@ -10,7 +10,7 @@ use JetBrains\PhpStorm\Pure;
 /**
  * @see https://developer.trackhs.com/reference/getownerunitscollection
  */
-class owerUnitCollection
+class ownerUnitCollection
 	extends
 	_envelope {
 

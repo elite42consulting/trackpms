@@ -58,6 +58,11 @@ try {
     $owner            = $api->getOwner( 1000 );
     $owners           = $api->getOwners( [ 'size' => 100 ] );
     $ownerCollections = $api->getOwnerCollections( [ 'size' => 100 ] );
+    $ownerUnits       = $api->getOwnerUnits( 1000 );
+    
+    $contract            = $api->getContract( 1 );
+    $contracts           = $api->getContracts( [ 'size' => 100 ] );
+    $contractCollections = $api->getContractCollections( [ 'size' => 100 ] );
 }
 catch( \elite42\trackpms\trackException $e ) {
     throw new controllerException( 'Error while running API command: '.$e->getMessage(), 400, $e);
@@ -134,13 +139,25 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 ---
 
 ### Owners
-| Fetch      | API Method                                                                                |
-|------------|-------------------------------------------------------------------------------------------|
-| One        | `$api->getOwner( int $ownerId )`                                                          |
-| Many       | `$api->getOwnerOrders( array $queryParams )`                                              |
-| Collection | `$api->getOwnerCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+| Fetch            | API Method                                                                                |
+|------------------|-------------------------------------------------------------------------------------------|
+| One Owner        | `$api->getOwner( int $ownerId )`                                                          |
+| Many Owners      | `$api->getOwnerOrders( array $queryParams )`                                              |
+| Owner Collection | `$api->getOwnerCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+| Owner Units      | `$api->getOwnerUnits( int $ownerId )`<br/>*Provides array of units for the owner*         |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getownercollection
+
+---
+
+### Contracts
+| Fetch      | API Method                                                                                   |
+|------------|----------------------------------------------------------------------------------------------|
+| One        | `$api->getContract( int $contractId )`                                                       |
+| Many       | `$api->getContracts( array $queryParams )`                                                   |
+| Collection | `$api->getContractCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getownercontractcollection
 
 ---
 

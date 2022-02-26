@@ -7,14 +7,18 @@ use elite42\trackpms\types\amenity;
 use elite42\trackpms\types\amenityGroup;
 use elite42\trackpms\types\collection\amenityCollection;
 use elite42\trackpms\types\collection\amenityGroupCollection;
+use elite42\trackpms\types\collection\contractCollection;
 use elite42\trackpms\types\collection\customFieldCollection;
 use elite42\trackpms\types\collection\maintenanceWorkOrderCollection;
 use elite42\trackpms\types\collection\ownerCollection;
+use elite42\trackpms\types\collection\ownerUnitCollection;
 use elite42\trackpms\types\collection\reservationCollection;
 use elite42\trackpms\types\collection\unitCollection;
+use elite42\trackpms\types\contract;
 use elite42\trackpms\types\customField;
 use elite42\trackpms\types\maintenanceWorkOrder;
 use elite42\trackpms\types\owner;
+use elite42\trackpms\types\ownerUnit;
 use elite42\trackpms\types\reservation;
 use elite42\trackpms\types\unit;
 use GuzzleHttp\Exception\GuzzleException;
@@ -710,6 +714,112 @@ class trackApi {
 		}
 
 		return $ownerCollections;
+	}
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getownerUnitcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\ownerUnit[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getOwnerUnits( int $ownerId, array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/owners/'.$ownerId.'/units', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\ownerUnitCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$ownerUnits = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->ownerUnits ) ) {
+					foreach( $apiResponse->_embedded?->ownerUnits as $ownerUnit ) {
+						$ownerUnits[] = ownerUnit::jsonDeserialize( $ownerUnit );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\ownerUnit', 500, $e );
+		}
+
+		return $ownerUnits;
+	}
+
+
+
+	/**
+	 * @param  int  $contractId
+	 *
+	 * @return \elite42\trackpms\types\contract
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getContract( int $contractId ) : contract {
+		$url = $this->buildUrl( '/pms/owners/contracts/' . $contractId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return contract::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\contract', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcontractcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\contract[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getContracts( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/owners/contracts', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\contractCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$contracts = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->contracts ) ) {
+					foreach( $apiResponse->_embedded?->contracts as $contract ) {
+						$contracts[] = contract::jsonDeserialize( $contract );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\contract', 500, $e );
+		}
+
+		return $contracts;
+	}
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcontractcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\contractCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getContractCollections( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/owners/contracts', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$contractCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$contractCollections[] = contractCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\contractCollection', 500, $e );
+			}
+		}
+
+		return $contractCollections;
 	}
 
 }
