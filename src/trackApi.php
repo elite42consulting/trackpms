@@ -15,6 +15,7 @@ use elite42\trackpms\types\collection\ownerUnitCollection;
 use elite42\trackpms\types\collection\reservationCollection;
 use elite42\trackpms\types\collection\reservationFeeCollection;
 use elite42\trackpms\types\collection\reservationNoteCollection;
+use elite42\trackpms\types\collection\reservationRateCollection;
 use elite42\trackpms\types\collection\unitCollection;
 use elite42\trackpms\types\contract;
 use elite42\trackpms\types\customField;
@@ -24,6 +25,7 @@ use elite42\trackpms\types\ownerUnit;
 use elite42\trackpms\types\reservation;
 use elite42\trackpms\types\reservationFee;
 use elite42\trackpms\types\reservationNote;
+use elite42\trackpms\types\reservationRate;
 use elite42\trackpms\types\unit;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -415,6 +417,35 @@ class trackApi {
 		}
 
 		return $reservationFeeCollections;
+	}
+
+
+	/**
+	 * @param  int  $reservationId
+	 *
+	 * @return \elite42\trackpms\types\reservationNote[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationRates( int $reservationId ) : array {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/rates' );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$reservationRates = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->rates ) ) {
+					foreach( $apiResponse->rates as $reservationRate ) {
+						$reservationRates[] = reservationRate::jsonDeserialize( $reservationRate );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationNote', 500, $e );
+		}
+
+		return $reservationRates;
 	}
 
 

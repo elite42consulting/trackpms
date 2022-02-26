@@ -47,6 +47,8 @@ try {
     $reservationNotes = $api->getReservationNotes( 1 );
     $reservationNoteCollections = $api->getReservationNoteCollections( 1 );
     
+    $reservationRates = $api->getReservationRates( 1 );
+    
     $amenity = $api->getAmenity( 1 );
     $amenities = $api->getAmenities( [ 'size' => 100 ] );
     $amenityCollections = $api->getAmenityCollections( [ 'size' => 100 ] );
@@ -117,6 +119,13 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 | One Specific Reservation Note       | `$api->getReservationNote( int $reservationId, int $reservationFeeId )`                             |
 | All Notes for Reservation           | `$api->getReservationNotes( int $reservationId )`                                                   |
 | Collection of Notes for Reservation | `$api->getReservationNoteCollections( int $reservationId )`<br/>*Provides full paged API responses* |
+
+---
+
+### Reservation Rates
+| Fetch                   | API Method                                          |
+|-------------------------|-----------------------------------------------------|
+| Rates for Reservation   | `$api->getReservationRates( int $reservationId )`   |
 
 ---
 
