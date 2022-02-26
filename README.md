@@ -38,7 +38,7 @@ catch( \elite42\trackpms\trackException $e ) {
 ## Methods
 ---
 ###Units
-| Type        | API Method                                                                               |
+| Fetch        | API Method                                                                               |
 |-------------|------------------------------------------------------------------------------------------|
 | One Unit    | `$api->getUnit( int $unitId )`                                                           |
 | Many Units  | `$api->getUnits( array $queryParams )`                                                   |
@@ -49,10 +49,10 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 ---
 
 ###Reservations
-| Type        | API Method                                                                               |
-|-------------|------------------------------------------------------------------------------------------|
-| One Unit    | `$api->getReservation( int $reservationId )`                                                           |
-| Many Units  | `$api->getReservations( array $queryParams )`                                                   |
-| Collection  | `$api->getReservationCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+| Fetch            | API Method                                                                                      |
+|------------------|-------------------------------------------------------------------------------------------------|
+| One Reservation  | `$api->getReservation( int $reservationId )`                                                    |
+| Many Reservation | `$api->getReservations( array $queryParams )`                                                   |
+| Collection       | `$api->getReservationCollections( array $queryParams )`<br/>*Provides full paged API responses* |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getreservations
