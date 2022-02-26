@@ -1,8 +1,8 @@
 {
   "name": "elite42/trackpms",
-  "description": "PHP integration library for Track Pulse",
+  "description": "PHP SDK library for Track Pulse API",
   "minimum-stability": "stable",
-  "license": "proprietary",
+  "license": "MIT",
   "autoload": {
 	"psr-4": {
 	  "elite42\\trackpms\\": "src/"
