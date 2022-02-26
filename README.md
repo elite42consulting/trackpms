@@ -39,6 +39,10 @@ try {
     $reservations           = $api->getReservations( [ 'size' => 100 ] );
     $reservationCollections = $api->getReservationCollections( [ 'size' => 100 ] );
     
+    $reservationFee = $api->getReservationFee( 1, 2 );
+    $reservationFees = $api->getReservationFees( 1 );
+    $reservationFeeCollections = $api->getReservationFeeCollections( 1 );
+    
     $amenity = $api->getAmenity( 1 );
     $amenities = $api->getAmenities( [ 'size' => 100 ] );
     $amenityCollections = $api->getAmenityCollections( [ 'size' => 100 ] );
@@ -91,6 +95,15 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 | Collection        | `$api->getReservationCollections( array $queryParams )`<br/>*Provides full paged API responses* |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getreservations
+
+---
+
+### Reservation Fees
+| Fetch                              | API Method                                                                                         |
+|------------------------------------|----------------------------------------------------------------------------------------------------|
+| One Reservation Fee                | `$api->getReservationFee( int $reservationId, int $reservationFeeId )`                             |
+| All Fees for Reservation           | `$api->getReservationFees( int $reservationId )`                                                   |
+| Collection of Fees for Reservation | `$api->getReservationFeeCollections( int $reservationId )`<br/>*Provides full paged API responses* |
 
 ---
 

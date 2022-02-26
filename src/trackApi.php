@@ -13,6 +13,7 @@ use elite42\trackpms\types\collection\maintenanceWorkOrderCollection;
 use elite42\trackpms\types\collection\ownerCollection;
 use elite42\trackpms\types\collection\ownerUnitCollection;
 use elite42\trackpms\types\collection\reservationCollection;
+use elite42\trackpms\types\collection\reservationFeeCollection;
 use elite42\trackpms\types\collection\unitCollection;
 use elite42\trackpms\types\contract;
 use elite42\trackpms\types\customField;
@@ -20,6 +21,7 @@ use elite42\trackpms\types\maintenanceWorkOrder;
 use elite42\trackpms\types\owner;
 use elite42\trackpms\types\ownerUnit;
 use elite42\trackpms\types\reservation;
+use elite42\trackpms\types\reservationFee;
 use elite42\trackpms\types\unit;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -334,6 +336,83 @@ class trackApi {
 		}
 
 		return $reservationCollections;
+	}
+
+
+	/**
+	 * @param  int  $reservationId
+	 * @param  int  $reservationFeeId
+	 *
+	 * @return \elite42\trackpms\types\reservationFee
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationFee( int $reservationId, int $reservationFeeId ) : types\reservationFee {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/fees/' . $reservationFeeId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return reservationFee::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationFee', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  int  $reservationId
+	 *
+	 * @return \elite42\trackpms\types\reservationFee[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationFees( int $reservationId ) : array {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/fees' );
+
+		/** @var \elite42\trackpms\types\collection\reservationFeeCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$reservationFees = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->fees ) ) {
+					foreach( $apiResponse->_embedded?->fees as $reservationFee ) {
+						$reservationFees[] = reservationFee::jsonDeserialize( $reservationFee );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationFee', 500, $e );
+		}
+
+		return $reservationFees;
+	}
+
+
+	/**
+	 * @param  int  $reservationId
+	 *
+	 * @return \elite42\trackpms\types\collection\reservationFeeCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationFeeCollections( int $reservationId ) : array {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/fees' );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$reservationFeeCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$reservationFeeCollections[] = reservationFeeCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationFeeCollection', 500, $e );
+			}
+		}
+
+		return $reservationFeeCollections;
 	}
 
 
@@ -716,6 +795,7 @@ class trackApi {
 		return $ownerCollections;
 	}
 
+
 	/**
 	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getownerUnitcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
@@ -723,7 +803,7 @@ class trackApi {
 	 * @throws \elite42\trackpms\trackException
 	 */
 	public function getOwnerUnits( int $ownerId, array $queryParams = [] ) : array {
-		$url = $this->buildUrl( '/pms/owners/'.$ownerId.'/units', $queryParams );
+		$url = $this->buildUrl( '/pms/owners/' . $ownerId . '/units', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\ownerUnitCollection[] $apiResponses */
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -744,7 +824,6 @@ class trackApi {
 
 		return $ownerUnits;
 	}
-
 
 
 	/**
