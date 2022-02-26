@@ -43,6 +43,10 @@ try {
     $reservationFees = $api->getReservationFees( 1 );
     $reservationFeeCollections = $api->getReservationFeeCollections( 1 );
     
+    $reservationNote = $api->getReservationNote( 1, 15 );
+    $reservationNotes = $api->getReservationNotes( 1 );
+    $reservationNoteCollections = $api->getReservationNoteCollections( 1 );
+    
     $amenity = $api->getAmenity( 1 );
     $amenities = $api->getAmenities( [ 'size' => 100 ] );
     $amenityCollections = $api->getAmenityCollections( [ 'size' => 100 ] );
@@ -52,10 +56,10 @@ try {
     $amenityGroupCollections = $api->getAmenityGroupCollections( [ 'size' => 100 ] );
     
     $customField            = $api->getCustomField( 1 );
-	$customFields           = $api->getCustomFields( [ 'size' => 100 ] );
-	$customFieldCollections = $api->getCustomFieldCollections( [ 'size' => 100 ] );
+    $customFields           = $api->getCustomFields( [ 'size' => 100 ] );
+    $customFieldCollections = $api->getCustomFieldCollections( [ 'size' => 100 ] );
 	
-	$maintenanceWorkOrder            = $api->getMaintenanceWorkOrder( 3 );
+    $maintenanceWorkOrder            = $api->getMaintenanceWorkOrder( 3 );
     $maintenanceWorkOrders           = $api->getMaintenanceWorkOrders( [ 'size' => 100 ] );
     $maintenanceWorkOrderCollections = $api->getMaintenanceWorkOrderCollections( [ 'size' => 100 ] );
     
@@ -99,11 +103,20 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 ---
 
 ### Reservation Fees
-| Fetch                              | API Method                                                                                         |
-|------------------------------------|----------------------------------------------------------------------------------------------------|
-| One Reservation Fee                | `$api->getReservationFee( int $reservationId, int $reservationFeeId )`                             |
-| All Fees for Reservation           | `$api->getReservationFees( int $reservationId )`                                                   |
-| Collection of Fees for Reservation | `$api->getReservationFeeCollections( int $reservationId )`<br/>*Provides full paged API responses* |
+| Fetch                               | API Method                                                                                         |
+|-------------------------------------|----------------------------------------------------------------------------------------------------|
+| One Specific Reservation Fee        | `$api->getReservationFee( int $reservationId, int $reservationFeeId )`                             |
+| All Fees for Reservation            | `$api->getReservationFees( int $reservationId )`                                                   |
+| Collection of Fees for Reservation  | `$api->getReservationFeeCollections( int $reservationId )`<br/>*Provides full paged API responses* |
+
+---
+
+### Reservation Notes
+| Fetch                               | API Method                                                                                          |
+|-------------------------------------|-----------------------------------------------------------------------------------------------------|
+| One Specific Reservation Note       | `$api->getReservationNote( int $reservationId, int $reservationFeeId )`                             |
+| All Notes for Reservation           | `$api->getReservationNotes( int $reservationId )`                                                   |
+| Collection of Notes for Reservation | `$api->getReservationNoteCollections( int $reservationId )`<br/>*Provides full paged API responses* |
 
 ---
 
@@ -141,11 +154,11 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 ---
 
 ### Maintenance Work Orders
-| Fetch      | API Method                                                                                               |
-|------------|----------------------------------------------------------------------------------------------------------|
-| One        | `$api->getMaintenanceWorkOrder( int $maintenanceWorkOrderId )`                                           |
-| Many       | `$api->getMaintenanceWorkOrders( array $queryParams )`                                                   |
-| Collection | `$api->getMaintenanceWorkOrderCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+| Fetch            | API Method                                                                                               |
+|------------------|----------------------------------------------------------------------------------------------------------|
+| One Work Order   | `$api->getMaintenanceWorkOrder( int $maintenanceWorkOrderId )`                                           |
+| Many Work Orders | `$api->getMaintenanceWorkOrders( array $queryParams )`                                                   |
+| Collection       | `$api->getMaintenanceWorkOrderCollections( array $queryParams )`<br/>*Provides full paged API responses* |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getmaintworkorders
 
@@ -164,17 +177,17 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 ---
 
 ### Contracts
-| Fetch      | API Method                                                                                   |
-|------------|----------------------------------------------------------------------------------------------|
-| One        | `$api->getContract( int $contractId )`                                                       |
-| Many       | `$api->getContracts( array $queryParams )`                                                   |
-| Collection | `$api->getContractCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+| Fetch          | API Method                                                                                   |
+|----------------|----------------------------------------------------------------------------------------------|
+| One Contract   | `$api->getContract( int $contractId )`                                                       |
+| Many Contracts | `$api->getContracts( array $queryParams )`                                                   |
+| Collection     | `$api->getContractCollections( array $queryParams )`<br/>*Provides full paged API responses* |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getownercontractcollection
 
 ---
 
-### Manual Call to Track API
+### Manual Calls to Track API for methods not implemented
 | Fetch              | API Method                                                                                    |
 |--------------------|-----------------------------------------------------------------------------------------------|
 | Call Once Only     | `$api->call( string $httpMethod, string $apiUrl, array $bodyParams=[] )`                      |

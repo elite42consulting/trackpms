@@ -14,6 +14,7 @@ use elite42\trackpms\types\collection\ownerCollection;
 use elite42\trackpms\types\collection\ownerUnitCollection;
 use elite42\trackpms\types\collection\reservationCollection;
 use elite42\trackpms\types\collection\reservationFeeCollection;
+use elite42\trackpms\types\collection\reservationNoteCollection;
 use elite42\trackpms\types\collection\unitCollection;
 use elite42\trackpms\types\contract;
 use elite42\trackpms\types\customField;
@@ -22,6 +23,7 @@ use elite42\trackpms\types\owner;
 use elite42\trackpms\types\ownerUnit;
 use elite42\trackpms\types\reservation;
 use elite42\trackpms\types\reservationFee;
+use elite42\trackpms\types\reservationNote;
 use elite42\trackpms\types\unit;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -413,6 +415,83 @@ class trackApi {
 		}
 
 		return $reservationFeeCollections;
+	}
+
+
+	/**
+	 * @param  int  $reservationId
+	 * @param  int  $reservationNoteId
+	 *
+	 * @return \elite42\trackpms\types\reservationNote
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationNote( int $reservationId, int $reservationNoteId ) : types\reservationNote {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/notes/' . $reservationNoteId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return reservationNote::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationNote', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  int  $reservationId
+	 *
+	 * @return \elite42\trackpms\types\reservationNote[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationNotes( int $reservationId ) : array {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/notes' );
+
+		/** @var \elite42\trackpms\types\collection\reservationNoteCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$reservationNotes = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->notes ) ) {
+					foreach( $apiResponse->_embedded?->notes as $reservationNote ) {
+						$reservationNotes[] = reservationNote::jsonDeserialize( $reservationNote );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationNote', 500, $e );
+		}
+
+		return $reservationNotes;
+	}
+
+
+	/**
+	 * @param  int  $reservationId
+	 *
+	 * @return \elite42\trackpms\types\collection\reservationNoteCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationNoteCollections( int $reservationId ) : array {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/notes' );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$reservationNoteCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$reservationNoteCollections[] = reservationNoteCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationNoteCollection', 500, $e );
+			}
+		}
+
+		return $reservationNoteCollections;
 	}
 
 
