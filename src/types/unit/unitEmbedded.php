@@ -7,7 +7,7 @@ class unitEmbedded
 	extends
 	\andrewsauder\jsonDeserialize\jsonDeserialize {
 
-//	public ?\elite42\trackpms\types\node   $node              = null;
+	public ?\elite42\trackpms\types\node               $node               = null;
 
 	public ?\elite42\trackpms\types\taxDistrict        $taxDistrict        = null;
 
