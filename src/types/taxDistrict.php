@@ -3,6 +3,9 @@
 namespace elite42\trackpms\types;
 
 
+use andrewsauder\jsonDeserialize\attributes\excludeJsonDeserialize;
+
+
 class taxDistrict
 	extends
 	\andrewsauder\jsonDeserialize\jsonDeserialize {
@@ -27,16 +30,23 @@ class taxDistrict
 
 	//public string $salesTaxPolicy = '';
 
-	public bool $taxMarkup = false;
+	public bool                                      $taxMarkup      = false;
 
-	public ?\DateTimeImmutable                       $createdAt = null;
+	public ?\DateTimeImmutable                       $createdAt      = null;
 
-	public string                                    $createdBy = '';
+	public string                                    $createdBy      = '';
 
-	public ?\DateTimeImmutable                       $updatedAt = null;
+	public ?\DateTimeImmutable                       $updatedAt      = null;
 
-	public string                                    $updatedBy = '';
+	public string                                    $updatedBy      = '';
 
-	public ?\elite42\trackpms\types\_envelope\_links $_links    = null;
+	public string                                    $longTermPolicy = '';
+
+	public string                                    $salesTaxPolicy = '';
+
+	#[excludeJsonDeserialize]
+	public ?array                                     $_embedded      = null;
+
+	public ?\elite42\trackpms\types\_envelope\_links $_links         = null;
 
 }

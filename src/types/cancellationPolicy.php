@@ -41,4 +41,9 @@ class cancellationPolicy
 
 	public string              $airbnbType       = '';
 
+	/** @var \elite42\trackpms\types\cancellationPolicy\cancellationPolicyBreakpoint[]  */
+	public array              $breakpoints       = [];
+
+	public ?\elite42\trackpms\types\_envelope\_links $_links                    = null;
+
 }

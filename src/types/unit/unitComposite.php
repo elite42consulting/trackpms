@@ -9,6 +9,7 @@ class unitComposite
 
 	public string $type   = '';
 
-	public ?int    $userId = null;
+	//public ?int    $userId = null;
+	public ?int    $unitId = null;
 
 }

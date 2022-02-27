@@ -3,9 +3,6 @@
 namespace elite42\trackpms\types;
 
 
-use elite42\trackpms\types\_envelope\_links;
-
-
 class node
 	extends
 	\andrewsauder\jsonDeserialize\jsonDeserialize {
@@ -95,6 +92,9 @@ class node
 
 	public ?int                $maintenanceZoneId    = null;
 
+	//TODO: add array type
+	public array $housekeepingNotes = [];
+
 	/** @var int[] */
 	public array $guaranteePoliciesIds = [];
 
@@ -105,8 +105,10 @@ class node
 	public array $gatewaysIds = [];
 
 	/** @var int[] */
-	public array   $amenitiesIds = [];
+	public array                                      $amenitiesIds = [];
 
-	public ?_links $_links       = null;
+	public ?\elite42\trackpms\types\node\nodeEmbedded $_embedded    = null;
+
+	public ?\elite42\trackpms\types\_envelope\_links  $_links       = null;
 
 }

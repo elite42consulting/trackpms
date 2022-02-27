@@ -15,101 +15,104 @@ class unitType
 	public bool $isActive = false;
 
 	/** @var \elite42\trackpms\types\unit\unitBedType[] */
-	public array                                             $bedTypes  = [];
+	public array $bedTypes = [];
 
-	public array                                             $custom    = [];
+	/** @var \elite42\trackpms\types\unitType\unitTypeRole[] */
+	public array                                             $roles                    = [];
 
-	public ?\elite42\trackpms\types\unitType\unitTypeUpdated $updated   = null;
+	public array                                             $custom                   = [];
 
-	public ?\DateTimeImmutable                               $createdAt = null;
+	public ?\elite42\trackpms\types\unitType\unitTypeUpdated $updated                  = null;
 
-	public string                                            $createdBy = '';
+	public ?\DateTimeImmutable                               $createdAt                = null;
 
-	public ?\DateTimeImmutable                               $updatedAt = null;
+	public string                                            $createdBy                = '';
 
-	public string                                            $updatedBy = '';
+	public ?\DateTimeImmutable                               $updatedAt                = null;
 
-	public string              $name                     = '';
+	public string                                            $updatedBy                = '';
 
-	public ?int                $maxPets                  = null;
+	public string                                            $name                     = '';
 
-	public ?int                $minimumAgeLimit          = null;
+	public ?int                                              $maxPets                  = null;
 
-	public ?float              $maxDiscount              = null;
+	public ?int                                              $minimumAgeLimit          = null;
 
-	public string              $area                     = '';
+	public ?float                                            $maxDiscount              = null;
 
-	public string              $websiteUrl               = '';
+	public string                                            $area                     = '';
 
-	public ?float              $floors                   = null;
+	public string                                            $websiteUrl               = '';
 
-	public ?int                $maxOccupancy             = null;
+	public ?float                                            $floors                   = null;
 
-	public ?int                $bedrooms                 = null;
+	public ?int                                              $maxOccupancy             = null;
 
-	public ?int                $fullBathrooms            = null;
+	public ?int                                              $bedrooms                 = null;
 
-	public ?int                $threeQuarterBathrooms    = null;
+	public ?int                                              $fullBathrooms            = null;
 
-	public ?int                $halfBathrooms            = null;
+	public ?int                                              $threeQuarterBathrooms    = null;
 
-	public string              $timezone                 = '';
+	public ?int                                              $halfBathrooms            = null;
 
-	public string              $maintenanceMessage       = '';
+	public string                                            $timezone                 = '';
 
-	public string              $housekeepingMessage      = '';
+	public string                                            $maintenanceMessage       = '';
 
-	public string              $housekeepingNotes        = '';
+	public string                                            $housekeepingMessage      = '';
 
-	public ?int                $oversellLimit            = null;
+	public string                                            $housekeepingNotes        = '';
 
-	public ?float              $securityDeposit          = null;
+	public ?int                                              $oversellLimit            = null;
 
-	public bool                $petFriendly              = false;
+	public ?float                                            $securityDeposit          = null;
 
-	public bool                $smokingAllowed           = false;
+	public bool                                              $petFriendly              = false;
 
-	public bool                $childrenAllowed          = false;
+	public bool                                              $smokingAllowed           = false;
 
-	public bool                $eventsAllowed            = false;
+	public bool                                              $childrenAllowed          = false;
 
-	public bool                $isAccessible             = false;
+	public bool                                              $eventsAllowed            = false;
 
-	public bool                $hasEarlyCheckin          = false;
+	public bool                                              $isAccessible             = false;
 
-	public bool                $hasLateCheckout          = false;
+	public bool                                              $hasEarlyCheckin          = false;
 
-	public bool                $quickCheckin             = false;
+	public bool                                              $hasLateCheckout          = false;
 
-	public bool                $quickCheckout            = false;
+	public bool                                              $quickCheckin             = false;
 
-	public bool                $useRoomConfiguration     = false;
+	public bool                                              $quickCheckout            = false;
 
-	public bool                $isBookable               = false;
+	public bool                                              $useRoomConfiguration     = false;
 
-	public bool                $allowUnitRates           = false;
+	public bool                                              $isBookable               = false;
 
-	public bool                $allowOversell            = false;
+	public bool                                              $allowUnitRates           = false;
 
-	public ?\DateTimeImmutable $checkinTime              = null;
+	public bool                                              $allowOversell            = false;
 
-	public ?\DateTimeImmutable $checkoutTime             = null;
+	public ?\DateTimeImmutable                               $checkinTime              = null;
 
-	public ?\DateTimeImmutable $earlyCheckinTime         = null;
+	public ?\DateTimeImmutable                               $checkoutTime             = null;
 
-	public ?\DateTimeImmutable $lateCheckoutTime         = null;
+	public ?\DateTimeImmutable                               $earlyCheckinTime         = null;
 
-	public ?int                $lodgingTypeId            = null;
+	public ?\DateTimeImmutable                               $lateCheckoutTime         = null;
 
-	public ?int                $cancellationPolicyId     = null;
+	public ?int                                              $lodgingTypeId            = null;
 
-	public ?int                $calendarGroupId          = null;
+	public ?int                                              $cancellationPolicyId     = null;
 
-	public ?int                $housekeepingZoneId       = null;
+	public ?int                                              $calendarGroupId          = null;
 
-	public ?int                $maintenanceZoneId        = null;
+	public ?int                                              $housekeepingZoneId       = null;
 
-	public ?int                $travelInsuranceProductId = null;
+	public ?int                                              $maintenanceZoneId        = null;
+
+	public ?int                                              $travelInsuranceProductId = null;
 
 	/** @var int[] */
 	public array $guaranteePoliciesIds = [];
@@ -125,6 +128,6 @@ class unitType
 
 	public ?\elite42\trackpms\types\unitType\unitTypeEmbedded $_embedded   = null;
 
-	public ?\elite42\trackpms\types\_envelope\_links $_links = null;
+	public ?\elite42\trackpms\types\_envelope\_links          $_links      = null;
 
 }
