@@ -150,6 +150,10 @@ class unitCustomFields
 
 	public int    $pms_units_hot_tubs_to_service_hot_tub_scheduler              = 0;
 
+	public int    $pms_units_pools_to_service_hot_tub_scheduler                 = 0;
+
+	public string $pms_units_neighborhood                                       = '';
+
 	public string $pms_units_dock_directions_guest_use                          = '';
 
 	public string $pms_units_lake_access_directions_guest_use                   = '';
