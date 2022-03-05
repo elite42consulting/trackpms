@@ -19,7 +19,7 @@ class reservationEmbedded
 
 	public ?\elite42\trackpms\types\user               $user               = null;
 
-	public ?\elite42\trackpms\types\user               $canceledBy         = null;
+	public ?\elite42\trackpms\types\user               $cancelledBy        = null;
 
 	public ?\elite42\trackpms\types\paymentMethod      $paymentMethod      = null;
 
