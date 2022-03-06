@@ -18,15 +18,6 @@
 	"php": ">=8.0",
 	"guzzlehttp/guzzle": "^7.4",
 	"monolog/monolog": "^2.3",
-	"andrewsauder/json-deserialize": "dev-main"
-  },
-  "repositories": [
-	{
-	  "type": "path",
-	  "url": "C:/inetpub/www/packages/jsonDeserialize/",
-	  "options": {
-		"symlink": true
-	  }
-	}
-  ]
+	"andrewsauder/json-deserialize": "^2.1"
+  }
 }
