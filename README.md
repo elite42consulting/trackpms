@@ -1,4 +1,4 @@
-# TRACK Property Management System PHP SDK
+**# TRACK Property Management System PHP SDK
 PHP SDK library for [Track Pulse API](https://developer.trackhs.com/reference/)
 
 ***This SDK is not created or supported by Track***
@@ -73,6 +73,19 @@ try {
     $contract            = $api->getContract( 1 );
     $contracts           = $api->getContracts( [ 'size' => 100 ] );
     $contractCollections = $api->getContractCollections( [ 'size' => 100 ] );
+    
+    $unitRole            = $api->getUnitRole( 1000 );
+    $unitRoles           = $api->getUnitRoles( [ 'size' => 100 ] );
+    $unitRoleCollections = $api->getUnitRoleCollections( [ 'size' => 100 ] );
+    
+    $user            = $api->getUser( 1000 );
+    $users           = $api->getUsers( [ 'size' => 100 ] );
+    $userCollections = $api->getUserCollections( [ 'size' => 100 ] );
+    
+    
+    $role            = $api->getRole( 1000 );
+    $roles           = $api->getRoles( [ 'size' => 100 ] );
+    $roleCollections = $api->getRoleCollections( [ 'size' => 100 ] );
 }
 catch( \elite42\trackpms\trackException $e ) {
     throw new controllerException( 'Error while running API command: '.$e->getMessage(), 400, $e);
@@ -177,7 +190,7 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 | Fetch            | API Method                                                                                |
 |------------------|-------------------------------------------------------------------------------------------|
 | One Owner        | `$api->getOwner( int $ownerId )`                                                          |
-| Many Owners      | `$api->getOwnerOrders( array $queryParams )`                                              |
+| Many Owners      | `$api->getOwners( array $queryParams )`                                                   |
 | Owner Collection | `$api->getOwnerCollections( array $queryParams )`<br/>*Provides full paged API responses* |
 | Owner Units      | `$api->getOwnerUnits( int $ownerId )`<br/>*Provides array of units for the owner*         |
 
@@ -196,6 +209,39 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 
 ---
 
+### Unit Roles
+| Fetch             | API Method                                                                                   |
+|-------------------|----------------------------------------------------------------------------------------------|
+| One Role          | `$api->getUnitRole( int $unitRoleId )`                                                       |
+| Many Roles        | `$api->getUnitRoles( array $queryParams )`                                                   |
+| Role Collection   | `$api->getUnitRoleCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getunitrolescollection
+
+---
+
+### Users
+| Fetch           | API Method                                                                               |
+|-----------------|------------------------------------------------------------------------------------------|
+| One User        | `$api->getUser( int $userId )`                                                           |
+| Many Users      | `$api->getUsers( array $queryParams )`                                                   |
+| User Collection | `$api->getUserCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+Not documented at Track. See some available `$queryParams` in an example in this discussion https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c
+
+---
+
+### Roles
+| Fetch           | API Method                                                                               |
+|-----------------|------------------------------------------------------------------------------------------|
+| One Role        | `$api->getRole( int $roleId )`                                                           |
+| Many Roles      | `$api->getRoles( array $queryParams )`                                                   |
+| Role Collection | `$api->getRoleCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+Not documented by Track API
+
+---
+
 ### Manual Calls to Track API for methods not implemented
 | Fetch              | API Method                                                                                    |
 |--------------------|-----------------------------------------------------------------------------------------------|
@@ -203,5 +249,5 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 | Auto Follow Paging | `$api->callAndFollowPaging( string $httpMethod, string $apiUrl, array $bodyParams=[] )`       |
 
 See available API URLs at https://developer.trackhs.com/reference/ 
-Note that manual calls will not be parsed into models. The function will return the default output of `json_decode( $responseBody, false, 512, JSON_THROW_ON_ERROR )` 
+Note that manual calls will not be parsed into models. The function will return the default output of `json_decode( $responseBody, false, 512, JSON_THROW_ON_ERROR )`** 
 

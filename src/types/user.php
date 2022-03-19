@@ -25,6 +25,7 @@ class user
 
 	public ?int                                      $vendorId   = null;
 
+	/** @var string[] */
 	public array                                     $assignable = [];
 
 	public ?\DateTimeImmutable                       $createdAt  = null;

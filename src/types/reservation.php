@@ -30,6 +30,7 @@ class reservation
 
 	public ?int                                                     $nights                   = null;
 
+	/** @var string {Hold, Confirmed, Checked Out, Checked In, and Cancelled} */
 	public string                                                   $status                   = '';
 
 	public ?\DateTimeImmutable                                      $cancelledAt              = null;

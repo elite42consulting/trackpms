@@ -16,7 +16,10 @@ use elite42\trackpms\types\collection\reservationCollection;
 use elite42\trackpms\types\collection\reservationFeeCollection;
 use elite42\trackpms\types\collection\reservationNoteCollection;
 use elite42\trackpms\types\collection\reservationRateCollection;
+use elite42\trackpms\types\collection\roleCollection;
+use elite42\trackpms\types\collection\unitRoleCollection;
 use elite42\trackpms\types\collection\unitCollection;
+use elite42\trackpms\types\collection\userCollection;
 use elite42\trackpms\types\contract;
 use elite42\trackpms\types\customField;
 use elite42\trackpms\types\maintenanceWorkOrder;
@@ -26,7 +29,10 @@ use elite42\trackpms\types\reservation;
 use elite42\trackpms\types\reservationFee;
 use elite42\trackpms\types\reservationNote;
 use elite42\trackpms\types\reservationRate;
+use elite42\trackpms\types\role;
+use elite42\trackpms\types\unitRole;
 use elite42\trackpms\types\unit;
+use elite42\trackpms\types\user;
 use GuzzleHttp\Exception\GuzzleException;
 
 
@@ -1009,6 +1015,236 @@ class trackApi {
 		}
 
 		return $contractCollections;
+	}
+
+
+	/**
+	 * @param  int  $unitRoleId
+	 *
+	 * @return \elite42\trackpms\types\unitRole
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getUnitRole( int $unitRoleId ) : unitRole {
+		$url = $this->buildUrl( '/pms/units/roles/' . $unitRoleId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return unitRole::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\role', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getrolecollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\unitRole[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getUnitRoles( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/units/roles', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\unitRoleCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$roles = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->unitRoles ) ) {
+					foreach( $apiResponse->_embedded?->unitRoles as $role ) {
+						$roles[] = unitRole::jsonDeserialize( $role );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\role', 500, $e );
+		}
+
+		return $roles;
+	}
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getrolecollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\unitRoleCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getUnitRoleCollections( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/units/roles', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$roleCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$roleCollections[] = unitRoleCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\roleCollection', 500, $e );
+			}
+		}
+
+		return $roleCollections;
+	}
+
+
+	/**
+	 * @param  int  $userId
+	 *
+	 * @return \elite42\trackpms\types\unitRole
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getUser( int $userId ) : unitRole {
+		$url = $this->buildUrl( '/user/' . $userId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return user::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\user', 500, $e );
+		}
+	}
+
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\user[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getUsers( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/users', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\userCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$users = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->users ) ) {
+					foreach( $apiResponse->_embedded?->users as $user ) {
+						$users[] = user::jsonDeserialize( $user );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\user', 500, $e );
+		}
+
+		return $users;
+	}
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\userCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getUserCollections( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/users', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$userCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$userCollections[] = userCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\userCollection', 500, $e );
+			}
+		}
+
+		return $userCollections;
+	}
+
+
+	/**
+	 * @param  int  $roleId
+	 *
+	 * @return \elite42\trackpms\types\unitRole
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getRole( int $roleId ) : unitRole {
+		$url = $this->buildUrl( '/role/' . $roleId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return role::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\role', 500, $e );
+		}
+	}
+
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\role[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getRoles( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/roles', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\roleCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$roles = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->roles ) ) {
+					foreach( $apiResponse->_embedded?->roles as $role ) {
+						$roles[] = role::jsonDeserialize( $role );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\role', 500, $e );
+		}
+
+		return $roles;
+	}
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getrolecollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\roleCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getRoleCollections( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/roles', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$roleCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$roleCollections[] = roleCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\roleCollection', 500, $e );
+			}
+		}
+
+		return $roleCollections;
 	}
 
 }

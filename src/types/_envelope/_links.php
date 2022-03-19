@@ -57,4 +57,6 @@ class _links
 
 	public ?link $attachments = null;
 
+	public ?link $role        = null;
+
 }
