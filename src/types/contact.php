@@ -61,18 +61,77 @@ class contact
 	public array $tags = [];
 
 	/** @var \elite42\trackpms\types\contact\reference[] */
-	public array                                     $references = [];
+	public array $references = [];
 
 //	public array                                     $custom     = [];
 
-	public ?\DateTimeImmutable                       $createdAt  = null;
+	public ?\DateTimeImmutable                       $createdAt = null;
 
-	public string                                    $createdBy  = '';
+	public string                                    $createdBy = '';
 
-	public ?\DateTimeImmutable                       $updatedAt  = null;
+	public ?\DateTimeImmutable                       $updatedAt = null;
 
-	public string                                    $updatedBy  = '';
+	public string                                    $updatedBy = '';
 
-	public ?\elite42\trackpms\types\_envelope\_links $_links     = null;
+	public ?\elite42\trackpms\types\_envelope\_links $_links    = null;
+
+
+	public function phonesToString() {
+		$phoneStringParts = [];
+		if( !empty( $this->cellPhone ) ) {
+			$phoneStringParts[] = 'Cell: ' . $this->cellPhone;
+		}
+		if( !empty( $this->homePhone ) ) {
+			$phoneStringParts[] = 'Home: ' . $this->homePhone;
+		}
+		if( !empty( $this->workPhone ) ) {
+			$phoneStringParts[] = 'Work: ' . $this->homePhone;
+		}
+		if( !empty( $this->otherPhone ) ) {
+			$phoneStringParts[] = 'Other: ' . $this->homePhone;
+		}
+
+		return implode( ', ', $phoneStringParts );
+	}
+
+
+	public function addressToString() {
+		$addressParts = [];
+		if( !empty( $this->streetAddress ) ) {
+			$addressParts[] = $this->streetAddress;
+		}
+		if( !empty( $this->extendedAddress ) ) {
+			$addressParts[] = $this->extendedAddress;
+		}
+		if( !empty( $this->locality ) ) {
+			$addressParts[] = $this->locality;
+		}
+		if( !empty( $this->region ) || !empty( $this->postalCode ) ) {
+			$stateZipParts = [];
+
+			if( !empty( $this->region ) ) {
+				$stateZipParts[] = $this->region;
+			}
+			if( !empty( $this->postalCode ) ) {
+				$stateZipParts[] = $this->postalCode;
+			}
+			$addressParts[] = implode( ' ', $stateZipParts );
+		}
+
+		return implode( ', ', $addressParts );
+	}
+
+
+	public function emailsToString() {
+		$emails = [];
+		if( !empty( $this->primaryEmail ) ) {
+			$emails[] = $this->primaryEmail;
+		}
+		if( !empty( $this->secondaryEmail ) ) {
+			$emails[] = $this->secondaryEmail;
+		}
+
+		return implode( ', ', $emails );
+	}
 
 }
