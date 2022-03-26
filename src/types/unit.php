@@ -201,6 +201,14 @@ class unit
 	public ?\elite42\trackpms\types\_envelope\_links  $_links      = null;
 
 
+	public function ownerNamesToString() {
+		$names = [];
+		foreach($this->_embedded->owners as $owner) {
+			$names[] = $owner->name;
+		}
+		return implode(', ', $names);
+	}
+
 	public function addressToString() {
 		$addressParts = [];
 		if( !empty( $this->streetAddress ) ) {

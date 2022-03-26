@@ -29,4 +29,7 @@ class unitEmbedded
 
 	public ?\elite42\trackpms\types\unit\unitLocalOffice            $localOffice            = null;
 
+	/** @var \elite42\trackpms\types\owner[] */
+	public array $owners = [];
+
 }
