@@ -16,6 +16,7 @@ use elite42\trackpms\types\collection\reservationCollection;
 use elite42\trackpms\types\collection\reservationFeeCollection;
 use elite42\trackpms\types\collection\reservationNoteCollection;
 use elite42\trackpms\types\collection\reservationRateCollection;
+use elite42\trackpms\types\collection\reservationTypeCollection;
 use elite42\trackpms\types\collection\roleCollection;
 use elite42\trackpms\types\collection\unitRoleCollection;
 use elite42\trackpms\types\collection\unitCollection;
@@ -29,6 +30,7 @@ use elite42\trackpms\types\reservation;
 use elite42\trackpms\types\reservationFee;
 use elite42\trackpms\types\reservationNote;
 use elite42\trackpms\types\reservationRate;
+use elite42\trackpms\types\reservationType;
 use elite42\trackpms\types\role;
 use elite42\trackpms\types\unitRole;
 use elite42\trackpms\types\unit;
@@ -1245,6 +1247,83 @@ class trackApi {
 		}
 
 		return $roleCollections;
+	}
+
+
+	/**
+	 * @param  int  $reservationTypeId
+	 *
+	 * @return \elite42\trackpms\types\reservationType
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationType( int $reservationTypeId ) : reservationType {
+		$url = $this->buildUrl( '/pms/reservations/types/' . $reservationTypeId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return reservationType::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationType', 500, $e );
+		}
+	}
+
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\reservationType[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationTypes( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/reservations/types', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\reservationTypeCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$reservationTypes = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->reservationTypes ) ) {
+					foreach( $apiResponse->_embedded?->reservationTypes as $reservationType ) {
+						$reservationTypes[] = reservationType::jsonDeserialize( $reservationType );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationType', 500, $e );
+		}
+
+		return $reservationTypes;
+	}
+
+
+	/**
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getreservationTypecollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\reservationTypeCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationTypeCollections( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/reservations/types', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$reservationTypeCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$reservationTypeCollections[] = reservationTypeCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationTypeCollection', 500, $e );
+			}
+		}
+
+		return $reservationTypeCollections;
 	}
 
 }
