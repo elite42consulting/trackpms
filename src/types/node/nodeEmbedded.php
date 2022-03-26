@@ -15,4 +15,6 @@ class nodeEmbedded
 
 	public ?\elite42\trackpms\types\_envelope\_linksWrapper $cancellationPolicy = null;
 
+	public ?\elite42\trackpms\types\unit\unitLocalOffice    $localOffice        = null;
+
 }

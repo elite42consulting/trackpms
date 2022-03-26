@@ -7,34 +7,40 @@ class unitLocalOffice
 	extends
 	\andrewsauder\jsonDeserialize\jsonDeserialize {
 
-	public string              $name            = '';
+	public ?int                                      $id              = null;
 
-	public string              $directions      = '';
+	public string                                    $name            = '';
 
-	public string              $email           = '';
+	public string                                    $directions      = '';
 
-	public string              $phone           = '';
+	public string                                    $email           = '';
 
-	public string              $extendedAddress = '';
+	public string                                    $phone           = '';
 
-	public string              $locality        = '';
+	public string                                    $streetAddress   = '';
 
-	public string              $region          = '';
+	public string                                    $extendedAddress = '';
 
-	public string              $postalCode      = '';
+	public string                                    $locality        = '';
 
-	public string              $country         = '';
+	public string                                    $region          = '';
 
-	public ?float              $latitude        = 0;
+	public string                                    $postalCode      = '';
 
-	public ?float              $longitude       = 0;
+	public string                                    $country         = '';
 
-	public ?\DateTimeImmutable $createdAt       = null;
+	public ?float                                    $latitude        = 0;
 
-	public string              $createdBy       = '';
+	public ?float                                    $longitude       = 0;
 
-	public ?\DateTimeImmutable $updatedAt       = null;
+	public ?\DateTimeImmutable                       $createdAt       = null;
 
-	public string              $updatedBy       = '';
+	public string                                    $createdBy       = '';
+
+	public ?\DateTimeImmutable                       $updatedAt       = null;
+
+	public string                                    $updatedBy       = '';
+
+	public ?\elite42\trackpms\types\_envelope\_links $_links          = null;
 
 }

@@ -27,4 +27,6 @@ class unitEmbedded
 
 	public ?\elite42\trackpms\types\unit\unitTravelInsuranceProduct $travelInsuranceProduct = null;
 
+	public ?\elite42\trackpms\types\unit\unitLocalOffice            $localOffice            = null;
+
 }

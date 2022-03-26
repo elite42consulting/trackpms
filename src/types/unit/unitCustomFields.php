@@ -176,4 +176,6 @@ class unitCustomFields
 
 	public string $pms_units_important_property_notifications_website_check_out = '';
 
+	public string $pms_units_area_of_lake                                       = '';
+
 }
