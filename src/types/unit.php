@@ -200,4 +200,31 @@ class unit
 
 	public ?\elite42\trackpms\types\_envelope\_links  $_links      = null;
 
+
+	public function addressToString() {
+		$addressParts = [];
+		if( !empty( $this->streetAddress ) ) {
+			$addressParts[] = $this->streetAddress;
+		}
+		if( !empty( $this->extendedAddress ) ) {
+			$addressParts[] = $this->extendedAddress;
+		}
+		if( !empty( $this->locality ) ) {
+			$addressParts[] = $this->locality;
+		}
+		if( !empty( $this->region ) || !empty( $this->postalCode ) ) {
+			$stateZipParts = [];
+
+			if( !empty( $this->region ) ) {
+				$stateZipParts[] = $this->region;
+			}
+			if( !empty( $this->postalCode ) ) {
+				$stateZipParts[] = $this->postalCode;
+			}
+			$addressParts[] = implode( ' ', $stateZipParts );
+		}
+
+		return implode( ', ', $addressParts );
+	}
+
 }
