@@ -117,28 +117,45 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 
 ---
 
-### Reservation Fees
+#### Reservation Fees
 | Fetch                               | API Method                                                                                         |
 |-------------------------------------|----------------------------------------------------------------------------------------------------|
 | One Specific Reservation Fee        | `$api->getReservationFee( int $reservationId, int $reservationFeeId )`                             |
 | All Fees for Reservation            | `$api->getReservationFees( int $reservationId )`                                                   |
 | Collection of Fees for Reservation  | `$api->getReservationFeeCollections( int $reservationId )`<br/>*Provides full paged API responses* |
 
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getreservationnotes
+
 ---
 
-### Reservation Notes
+#### Reservation Notes
 | Fetch                               | API Method                                                                                          |
 |-------------------------------------|-----------------------------------------------------------------------------------------------------|
 | One Specific Reservation Note       | `$api->getReservationNote( int $reservationId, int $reservationFeeId )`                             |
 | All Notes for Reservation           | `$api->getReservationNotes( int $reservationId )`                                                   |
 | Collection of Notes for Reservation | `$api->getReservationNoteCollections( int $reservationId )`<br/>*Provides full paged API responses* |
 
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getreservationfees
+
 ---
 
-### Reservation Rates
+#### Reservation Rates
 | Fetch                   | API Method                                          |
 |-------------------------|-----------------------------------------------------|
 | Rates for Reservation   | `$api->getReservationRates( int $reservationId )`   |
+
+See https://developer.trackhs.com/reference/getratesreservation
+
+---
+
+#### Reservation Types
+| Fetch                             | API Method                                                                                          |
+|-----------------------------------|-----------------------------------------------------------------------------------------------------|
+| One Reservation Type              | `$api->getReservationType( int $reservationTypeId )`                                                |
+| Many Reservation Types            | `$api->getReservationType( array $queryParams )`                                                    |
+| Collection of Reservation Types   | `$api->getReservationTypeCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+Not documented by Track API
 
 ---
 
@@ -198,6 +215,19 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 
 ---
 
+#### Company (Owners) Attachments
+| Fetch                                   | API Method                                                                                                                                                               |
+|-----------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| One Attachment for one "company"        | `$api->getCompanyAttachment( int $companyId, int $attachmentId )`                                                                                                        |
+| Many Attachments for one "company"      | `$api->getCompanyAttachments( int $companyId, array $queryParams )`                                                                                                      |
+| Attachment Collection for one "company" | `$api->getCompanyAttachmentCollections( int $companyId,  array $queryParams )`<br/>*Provides full paged API responses*                                                   |
+| Create Attachment on "Company"          | `$api->createCompanyAttachment( int $companyId, string $fileData, string $name, bool $isPublic, string $originalFilename )`<br/>*$fileData must be base 64 encoded data* |
+| Update Attachment on "Company"          | `$api->updateCompanyAttachment( int $companyId, int $attachmentId, string $name, bool $isPublic )`                                                                       |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getcompanyattachments
+
+---
+
 ### Contracts
 | Fetch          | API Method                                                                                   |
 |----------------|----------------------------------------------------------------------------------------------|
@@ -206,17 +236,6 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 | Collection     | `$api->getContractCollections( array $queryParams )`<br/>*Provides full paged API responses* |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getownercontractcollection
-
----
-
-### Unit Roles
-| Fetch             | API Method                                                                                   |
-|-------------------|----------------------------------------------------------------------------------------------|
-| One Role          | `$api->getUnitRole( int $unitRoleId )`                                                       |
-| Many Roles        | `$api->getUnitRoles( array $queryParams )`                                                   |
-| Role Collection   | `$api->getUnitRoleCollections( array $queryParams )`<br/>*Provides full paged API responses* |
-
-See available query params for `$queryParams` at https://developer.trackhs.com/reference/getunitrolescollection
 
 ---
 
@@ -239,6 +258,17 @@ Not documented at Track. See some available `$queryParams` in an example in this
 | Role Collection | `$api->getRoleCollections( array $queryParams )`<br/>*Provides full paged API responses* |
 
 Not documented by Track API
+
+---
+
+### Unit Roles
+| Fetch             | API Method                                                                                   |
+|-------------------|----------------------------------------------------------------------------------------------|
+| One Role          | `$api->getUnitRole( int $unitRoleId )`                                                       |
+| Many Roles        | `$api->getUnitRoles( array $queryParams )`                                                   |
+| Role Collection   | `$api->getUnitRoleCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getunitrolescollection
 
 ---
 

@@ -7,6 +7,7 @@ use elite42\trackpms\types\amenity;
 use elite42\trackpms\types\amenityGroup;
 use elite42\trackpms\types\collection\amenityCollection;
 use elite42\trackpms\types\collection\amenityGroupCollection;
+use elite42\trackpms\types\collection\companyAttachmentCollection;
 use elite42\trackpms\types\collection\contractCollection;
 use elite42\trackpms\types\collection\customFieldCollection;
 use elite42\trackpms\types\collection\maintenanceWorkOrderCollection;
@@ -21,6 +22,7 @@ use elite42\trackpms\types\collection\roleCollection;
 use elite42\trackpms\types\collection\unitRoleCollection;
 use elite42\trackpms\types\collection\unitCollection;
 use elite42\trackpms\types\collection\userCollection;
+use elite42\trackpms\types\companyAttachment;
 use elite42\trackpms\types\contract;
 use elite42\trackpms\types\customField;
 use elite42\trackpms\types\maintenanceWorkOrder;
@@ -1116,7 +1118,6 @@ class trackApi {
 	}
 
 
-
 	/**
 	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
@@ -1191,7 +1192,6 @@ class trackApi {
 			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\role', 500, $e );
 		}
 	}
-
 
 
 	/**
@@ -1270,7 +1270,6 @@ class trackApi {
 	}
 
 
-
 	/**
 	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
@@ -1324,6 +1323,144 @@ class trackApi {
 		}
 
 		return $reservationTypeCollections;
+	}
+
+
+	/**
+	 * @param  int  $companyId
+	 * @param  int  $attachmentId
+	 *
+	 * @return \elite42\trackpms\types\companyAttachment
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getCompanyAttachment( int $companyId, int $attachmentId ) : companyAttachment {
+		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments/' . $attachmentId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return companyAttachment::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\companyAttachment', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  int    $companyId
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\companyAttachment[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getCompanyAttachments( int $companyId, array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\companyAttachmentCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$companyAttachments = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->attachments ) ) {
+					foreach( $apiResponse->_embedded?->attachments as $companyAttachment ) {
+						$companyAttachments[] = companyAttachment::jsonDeserialize( $companyAttachment );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\companyAttachment', 500, $e );
+		}
+
+		return $companyAttachments;
+	}
+
+
+	/**
+	 * @param  int    $companyId
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanyAttachmentcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\companyAttachmentCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getCompanyAttachmentCollections( int $companyId, array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$companyAttachmentCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$companyAttachmentCollections[] = companyAttachmentCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\companyAttachmentCollection', 500, $e );
+			}
+		}
+
+		return $companyAttachmentCollections;
+	}
+
+
+	/**
+	 * @param  int     $companyId
+	 * @param  string  $fileData  Base 64 encoded data
+	 * @param  string  $name      Attachment name, will default to file name if empty string
+	 * @param  bool    $isPublic
+	 * @param  string  $originalFilename
+	 *
+	 * @return \elite42\trackpms\types\companyAttachment
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function createCompanyAttachment( int $companyId, string $fileData, string $name, bool $isPublic, string $originalFilename ) : companyAttachment {
+		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments' );
+
+		$body = [
+			'fileData'         => $fileData,
+			'name'             => $name,
+			'isPublic'         => $isPublic,
+			'originalFilename' => $originalFilename
+		];
+
+		$apiResponse = $this->call( 'POST', $url, $body );
+
+		try {
+			return companyAttachment::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\companyAttachment', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  int     $companyId
+	 * @param  int     $attachmentId
+	 * @param  string  $name  Attachment name, will default to file name if empty string
+	 * @param  bool    $isPublic
+	 *
+	 * @return \elite42\trackpms\types\companyAttachment
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function updateCompanyAttachment( int $companyId, int $attachmentId, string $name, bool $isPublic ) : companyAttachment {
+		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments/'. $attachmentId );
+
+		$body = [
+			'name'             => $name,
+			'isPublic'         => $isPublic
+		];
+
+		$apiResponse = $this->call( 'PATCH', $url, $body );
+
+		try {
+			return companyAttachment::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\companyAttachment', 500, $e );
+		}
 	}
 
 }
