@@ -157,7 +157,10 @@ class trackApi {
 		try {
 			$response = $client->request( strtoupper( $httpMethod ), $callUrl, $options );
 
-			$body = json_decode( $response->getBody()->getContents(), false, 512, JSON_THROW_ON_ERROR );
+			$body = new \stdClass();
+			if($response->getStatusCode()==200) {
+				$body = json_decode( $response->getBody()->getContents(), false, 512, JSON_THROW_ON_ERROR );
+			}
 
 			//set api cache
 			if( $this->settings->isEnableCaching() && strtoupper( $httpMethod ) == 'GET' ) {
@@ -1461,6 +1464,22 @@ class trackApi {
 		catch( jsonDeserializeException $e ) {
 			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\companyAttachment', 500, $e );
 		}
+	}
+
+
+	/**
+	 * @param  int     $companyId
+	 * @param  int     $attachmentId
+	 *
+	 * @return bool
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function deleteCompanyAttachment( int $companyId, int $attachmentId ) : bool {
+		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments/'. $attachmentId );
+
+		$apiResponse = $this->call( 'DELETE', $url );
+
+		return true;
 	}
 
 }
