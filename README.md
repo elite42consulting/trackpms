@@ -223,6 +223,7 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 | Attachment Collection for one "company" | `$api->getCompanyAttachmentCollections( int $companyId,  array $queryParams )`<br/>*Provides full paged API responses*                                                   |
 | Create Attachment on "Company"          | `$api->createCompanyAttachment( int $companyId, string $fileData, string $name, bool $isPublic, string $originalFilename )`<br/>*$fileData must be base 64 encoded data* |
 | Update Attachment on "Company"          | `$api->updateCompanyAttachment( int $companyId, int $attachmentId, string $name, bool $isPublic )`                                                                       |
+| Delete Attachment on "Company"          | `$api->deleteCompanyAttachment( int $companyId, int $attachmentId )`                                                                                                     |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getcompanyattachments
 
