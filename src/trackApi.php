@@ -19,6 +19,7 @@ use elite42\trackpms\types\collection\reservationNoteCollection;
 use elite42\trackpms\types\collection\reservationRateCollection;
 use elite42\trackpms\types\collection\reservationTypeCollection;
 use elite42\trackpms\types\collection\roleCollection;
+use elite42\trackpms\types\collection\unitBlockCollection;
 use elite42\trackpms\types\collection\unitRoleCollection;
 use elite42\trackpms\types\collection\unitCollection;
 use elite42\trackpms\types\collection\userCollection;
@@ -34,6 +35,7 @@ use elite42\trackpms\types\reservationNote;
 use elite42\trackpms\types\reservationRate;
 use elite42\trackpms\types\reservationType;
 use elite42\trackpms\types\role;
+use elite42\trackpms\types\unitBlock;
 use elite42\trackpms\types\unitRole;
 use elite42\trackpms\types\unit;
 use elite42\trackpms\types\user;
@@ -1405,6 +1407,86 @@ class trackApi {
 		}
 
 		return $companyAttachmentCollections;
+	}
+
+
+
+	/**
+	 * @param  int  $companyId
+	 * @param  int  $attachmentId
+	 *
+	 * @return \elite42\trackpms\types\unitBlock
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getUnitBlock( int $companyId, int $attachmentId ) : unitBlock {
+		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments/' . $attachmentId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return unitBlock::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\unitBlock', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  int    $companyId
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\unitBlock[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getUnitBlocks( int $companyId, array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\unitBlockCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$unitBlocks = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->attachments ) ) {
+					foreach( $apiResponse->_embedded?->attachments as $unitBlock ) {
+						$unitBlocks[] = unitBlock::jsonDeserialize( $unitBlock );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\unitBlock', 500, $e );
+		}
+
+		return $unitBlocks;
+	}
+
+
+	/**
+	 * @param  int    $companyId
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunitBlockcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\unitBlockCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getUnitBlockCollections( int $companyId, array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$unitBlockCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$unitBlockCollections[] = unitBlockCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\unitBlockCollection', 500, $e );
+			}
+		}
+
+		return $unitBlockCollections;
 	}
 
 

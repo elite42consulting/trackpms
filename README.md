@@ -159,6 +159,18 @@ Not documented by Track API
 
 ---
 
+#### Unit Blocks
+| Fetch                | API Method                                                                                     |
+|----------------------|------------------------------------------------------------------------------------------------|
+| One Block            | `$api->getUnitBlock( int $unitBlockId )`                                                       |
+| Many Blocks          | `$api->getUnitBlocks( array $queryParams )`                                                    |
+| Collection of Blocks | `$api->getUnitBlocksCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+
+See https://developer.trackhs.com/reference/getunitblock
+
+---
+
 ### Amenities
 | Fetch          | API Method                                                                                  |
 |----------------|---------------------------------------------------------------------------------------------|

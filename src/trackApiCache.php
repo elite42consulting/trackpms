@@ -30,7 +30,7 @@ class trackApiCache {
 
 
 
-	public function get( $wsdl, $method, $params, $xmlParamName='' ) {
+	public function get( $wsdl, $method, $params, int $maxAgeInSeconds=-1 ) {
 
 		$key = $this->generateKey( $wsdl, $method, $params );
 
@@ -40,8 +40,20 @@ class trackApiCache {
 
 		$fileName = $this->cacheFilePath.'/'.$key.'.cache';
 		if(file_exists($fileName)) {
-			$content = file_get_contents($fileName);
-			return unserialize( $content );
+			$allowCacheReturn = true;
+
+			if($maxAgeInSeconds!==-1) {
+				$cacheCreationDate = (new \DateTimeImmutable())->setTimestamp( filectime($fileName) );
+				$oldestAllowedCacheDate = (new \DateTimeImmutable())->sub( new \DateInterval('PT'.$maxAgeInSeconds.'S'));
+				if($cacheCreationDate>=$oldestAllowedCacheDate) {
+					$allowCacheReturn = false;
+				}
+			}
+
+			if( $allowCacheReturn) {
+				$content = file_get_contents( $fileName );
+				return unserialize( $content );
+			}
 		}
 
 		return null;
@@ -51,7 +63,7 @@ class trackApiCache {
 
 	private function generateKey( $wsdl, $method, $params ) : string {
 		$strParams = json_encode($params);
-		return $this->sid( $wsdl . '.' . $method . '.' . $strParams );
+		return md5( $wsdl . '.' . $method . '.' . $strParams );
 	}
 
 
