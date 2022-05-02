@@ -7,34 +7,36 @@ class unitBlock
 	extends
 	\andrewsauder\jsonDeserialize\jsonDeserialize {
 
-	public ?int                                                 $id            = null;
+	public ?int                                                 $id                = null;
 
-	public ?int                                                 $unitId        = null;
+	public ?int                                                 $unitId            = null;
 
-	public ?int                                                 $referenceId   = null;
+	public ?int                                                 $referenceId       = null;
 
-	public ?int                                                 $blockReasonId = null;
+	public ?int                                                 $blockReasonId     = null;
 
-	public ?int                                                 $cleanTypeId   = null;
+	public \elite42\trackpms\types\unitBlock\blockReason|null   $blockReasonInline = null;
 
-	public string                                               $blockNotes    = '';
+	public ?int                                                 $cleanTypeId       = null;
 
-	public bool                                                 $chargeOwner   = false;
+	public string                                               $blockNotes        = '';
 
-	public ?\DateTimeImmutable                                  $startDate     = null;
+	public bool                                                 $chargeOwner       = false;
 
-	public ?\DateTimeImmutable                                  $endDate       = null;
+	public ?\DateTimeImmutable                                  $startDate         = null;
 
-	public ?\DateTimeImmutable                                  $createdAt     = null;
+	public ?\DateTimeImmutable                                  $endDate           = null;
 
-	public string                                               $createdBy     = '';
+	public ?\DateTimeImmutable                                  $createdAt         = null;
 
-	public ?\DateTimeImmutable                                  $updatedAt     = null;
+	public string                                               $createdBy         = '';
 
-	public string                                               $updatedBy     = '';
+	public ?\DateTimeImmutable                                  $updatedAt         = null;
 
-	public ?\elite42\trackpms\types\unitBlock\unitBlockEmbedded $_embedded     = null;
+	public string                                               $updatedBy         = '';
 
-	public ?\elite42\trackpms\types\_envelope\_links            $_links        = null;
+	public ?\elite42\trackpms\types\unitBlock\unitBlockEmbedded $_embedded         = null;
+
+	public ?\elite42\trackpms\types\_envelope\_links            $_links            = null;
 
 }
