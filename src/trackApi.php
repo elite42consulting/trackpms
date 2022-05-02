@@ -1412,14 +1412,13 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $companyId
-	 * @param  int  $attachmentId
+	 * @param  int  $unitBlockId
 	 *
 	 * @return \elite42\trackpms\types\unitBlock
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnitBlock( int $companyId, int $attachmentId ) : unitBlock {
-		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments/' . $attachmentId );
+	public function getUnitBlock( int $unitBlockId ) : unitBlock {
+		$url = $this->buildUrl( '/pms/unit-blocks/' . $unitBlockId );
 
 		$apiResponse = $this->call( 'GET', $url );
 
@@ -1439,8 +1438,8 @@ class trackApi {
 	 * @return \elite42\trackpms\types\unitBlock[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnitBlocks( int $companyId, array $queryParams = [] ) : array {
-		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments', $queryParams );
+	public function getUnitBlocks( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/unit-blocks', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\unitBlockCollection[] $apiResponses */
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -1470,8 +1469,8 @@ class trackApi {
 	 * @return \elite42\trackpms\types\collection\unitBlockCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnitBlockCollections( int $companyId, array $queryParams = [] ) : array {
-		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments', $queryParams );
+	public function getUnitBlockCollections( array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/unit-blocks', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
 
