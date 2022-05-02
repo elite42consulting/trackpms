@@ -1447,8 +1447,8 @@ class trackApi {
 		$unitBlocks = [];
 		try {
 			foreach( $apiResponses as $apiResponse ) {
-				if( isset( $apiResponse->_embedded?->attachments ) ) {
-					foreach( $apiResponse->_embedded?->attachments as $unitBlock ) {
+				if( isset( $apiResponse->_embedded?->unitBlocks ) ) {
+					foreach( $apiResponse->_embedded?->unitBlocks as $unitBlock ) {
 						$unitBlocks[] = unitBlock::jsonDeserialize( $unitBlock );
 					}
 				}
