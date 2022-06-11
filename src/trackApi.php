@@ -30,6 +30,7 @@ use elite42\trackpms\types\maintenanceWorkOrder;
 use elite42\trackpms\types\owner;
 use elite42\trackpms\types\ownerUnit;
 use elite42\trackpms\types\reservation;
+use elite42\trackpms\types\reservationAttachment;
 use elite42\trackpms\types\reservationFee;
 use elite42\trackpms\types\reservationNote;
 use elite42\trackpms\types\reservationRate;
@@ -1557,6 +1558,136 @@ class trackApi {
 	 */
 	public function deleteCompanyAttachment( int $companyId, int $attachmentId ) : bool {
 		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments/'. $attachmentId );
+
+		$apiResponse = $this->call( 'DELETE', $url );
+
+		return true;
+	}
+
+
+	/**
+	 * @param  int    $reservationId
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\reservationAttachment[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationAttachments( int $reservationId, array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/reservations/'.$reservationId.'/attachments', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\reservationAttachmentCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$reservationAttachments = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->reservationAttachments ) ) {
+					foreach( $apiResponse->_embedded?->reservationAttachments as $reservationAttachment ) {
+						$reservationAttachments[] = reservationAttachment::jsonDeserialize( $reservationAttachment );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationAttachment', 500, $e );
+		}
+
+		return $reservationAttachments;
+	}
+
+
+	/**
+	 * @param  int    $reservationId
+	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getreservationAttachmentcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\reservationAttachmentCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationAttachmentCollections( int $reservationId, array $queryParams = [] ) : array {
+		$url = $this->buildUrl( '/pms/reservations/'.$reservationId.'/attachments', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$reservationAttachmentCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$reservationAttachmentCollections[] = reservationAttachmentCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationAttachmentCollection', 500, $e );
+			}
+		}
+
+		return $reservationAttachmentCollections;
+	}
+
+	/**
+	 * @param int    $reservationId
+	 * @param string $fileData Base 64 encoded data
+	 * @param string $name     Attachment name, will default to file name if empty string
+	 * @param string $type
+	 * @param string $originalFilename
+	 *
+	 * @return \elite42\trackpms\types\reservationAttachment
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function createReservationAttachment( int $reservationId, string $fileData, string $name, string $type, string $originalFilename ) : reservationAttachment {
+		$url = $this->buildUrl( '/pms/reservations/'.$reservationId.'/attachments' );
+
+		$body = [
+			'fileData'         => $fileData,
+			'name'             => $name,
+			'type'             => $type,
+			'originalFilename' => $originalFilename
+		];
+
+		$apiResponse = $this->call( 'POST', $url, $body );
+
+		try {
+			return reservationAttachment::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationAttachment', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  int     $reservationId
+	 * @param  int     $attachmentId
+	 * @param  string  $name  Attachment name, will default to file name if empty string
+	 *
+	 * @return \elite42\trackpms\types\reservationAttachment
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function updateReservationAttachment( int $reservationId, int $attachmentId, string $name ) : reservationAttachment {
+		$url = $this->buildUrl( '/pms/reservations/'.$reservationId.'/attachments/'. $attachmentId );
+
+		$body = [
+			'name'             => $name
+		];
+
+		$apiResponse = $this->call( 'PATCH', $url, $body );
+
+		try {
+			return reservationAttachment::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationAttachment', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param  int     $reservationId
+	 * @param  int     $attachmentId
+	 *
+	 * @return bool
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function deleteReservationAttachment( int $reservationId, int $attachmentId ) : bool {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/attachments/'. $attachmentId );
 
 		$apiResponse = $this->call( 'DELETE', $url );
 
