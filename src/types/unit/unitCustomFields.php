@@ -176,6 +176,26 @@ class unitCustomFields
 
 	public string $pms_units_important_property_notifications_website_check_out = '';
 
-	public string $pms_units_area_of_lake                                       = '';
+	public string $pms_units_ssid_wifi_name                                     = '';
+
+	public string $pms_units_ota_links_vrbo                                     = '';
+
+	public string $pms_units_ota_links_marriott                                 = '';
+
+	public string $pms_units_ota_links_airbnb                                   = '';
+
+	public string $pms_units_realtor_box_code                                   = '';
+
+	public string $pms_units_occ_restriction_fire_code                          = '';
+
+	public string $pms_units_it_dept_notes                                      = '';
+
+	public string $pms_units_hot_tub_outage_reimbursement                       = '';
+
+	public string $pms_units_dock_id                                            = '';
+
+	public string $pms_units_maintenance_links                                  = '';
+
+	public string $pms_units_minimum_rental_age                                 = '';
 
 }
