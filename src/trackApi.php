@@ -13,6 +13,7 @@ use elite42\trackpms\types\collection\customFieldCollection;
 use elite42\trackpms\types\collection\maintenanceWorkOrderCollection;
 use elite42\trackpms\types\collection\ownerCollection;
 use elite42\trackpms\types\collection\ownerUnitCollection;
+use elite42\trackpms\types\collection\reservationAttachmentCollection;
 use elite42\trackpms\types\collection\reservationCollection;
 use elite42\trackpms\types\collection\reservationFeeCollection;
 use elite42\trackpms\types\collection\reservationNoteCollection;
@@ -1581,8 +1582,8 @@ class trackApi {
 		$reservationAttachments = [];
 		try {
 			foreach( $apiResponses as $apiResponse ) {
-				if( isset( $apiResponse->_embedded?->reservationAttachments ) ) {
-					foreach( $apiResponse->_embedded?->reservationAttachments as $reservationAttachment ) {
+				if( isset( $apiResponse->_embedded?->attachments ) ) {
+					foreach( $apiResponse->_embedded?->attachments as $reservationAttachment ) {
 						$reservationAttachments[] = reservationAttachment::jsonDeserialize( $reservationAttachment );
 					}
 				}
@@ -1626,7 +1627,7 @@ class trackApi {
 	 * @param int    $reservationId
 	 * @param string $fileData Base 64 encoded data
 	 * @param string $name     Attachment name, will default to file name if empty string
-	 * @param string $type
+	 * @param string $type     'attachment', 'agreement'
 	 * @param string $originalFilename
 	 *
 	 * @return \elite42\trackpms\types\reservationAttachment
