@@ -296,6 +296,31 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 
 ---
 
+### Accounting
+
+#### Item Categories
+| Fetch      | API Method                                                                                       |
+|------------|--------------------------------------------------------------------------------------------------|
+| One        | `$api->getItemCategory( int $categoryId )`                                                       |
+| Many       | `$api->getItemCategories( array $queryParams )`                                                  |
+| Collection | `$api->getItemCategoryCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getitemcateogires
+
+---
+#### Accounts
+| Fetch      | API Method                                                                                  |
+|------------|---------------------------------------------------------------------------------------------|
+| One        | `$api->getAccount( int $categoryId )`                                                       |
+| Many       | `$api->getAccounts( array $queryParams )`                                                   |
+| Collection | `$api->getAccountCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getledgeraccounts
+
+---
+
+---
+
 ### Manual Calls to Track API for methods not implemented
 | Fetch              | API Method                                                                                    |
 |--------------------|-----------------------------------------------------------------------------------------------|
