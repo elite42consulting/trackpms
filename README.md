@@ -227,7 +227,18 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 
 ---
 
-#### Company (Owners) Attachments
+#### Companies (Vendors)
+| Fetch          | API Method                                                                                  |
+|----------------|---------------------------------------------------------------------------------------------|
+| One Company    | `$api->getCompany( int $companyId )`                                                        |
+| Many Companies | `$api->getCompanies( array $queryParams )`                                                  |
+| Collection     | `$api->getCompanyCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getcompany
+
+---
+
+#### Company (and Owners) Attachments
 | Fetch                                   | API Method                                                                                                                                                               |
 |-----------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | One Attachment for one "company"        | `$api->getCompanyAttachment( int $companyId, int $attachmentId )`                                                                                                        |
