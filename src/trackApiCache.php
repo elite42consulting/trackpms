@@ -18,7 +18,7 @@ class trackApiCache {
 
 
 
-	public function set( $wsdl, $method, $params, $returnValue ) {
+	public function set( $wsdl, $method, $params, $returnValue ) : string {
 
 		$key = $this->generateKey( $wsdl, $method, $params );
 
@@ -26,6 +26,8 @@ class trackApiCache {
 
 		$fileName = $this->cacheFilePath.'/'.$key.'.cache';
 		file_put_contents( $fileName, serialize($returnValue));
+
+		return $key;
 	}
 
 

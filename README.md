@@ -298,6 +298,17 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 
 ### Accounting
 
+#### Items
+| Fetch      | API Method                                                                                         |
+|------------|----------------------------------------------------------------------------------------------------|
+| One        | `$api->getAccountingItem( int $itemId )`                                                           |
+| Many       | `$api->getAccountingItems( array $queryParams )`                                                   |
+| Collection | `$api->getAccountingItemCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getitemscollection
+
+---
+
 #### Item Categories
 | Fetch      | API Method                                                                                       |
 |------------|--------------------------------------------------------------------------------------------------|
@@ -316,6 +327,27 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 | Collection | `$api->getAccountCollections( array $queryParams )`<br/>*Provides full paged API responses* |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getledgeraccounts
+
+---
+#### Transactions
+| Fetch      | API Method                                                                                      |
+|------------|-------------------------------------------------------------------------------------------------|
+| One        | `$api->getTransaction( int $transactionId )`                                                    |
+| Many       | `$api->getTransactions( array $queryParams )`                                                   |
+| Collection | `$api->getTransactionCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getowneridtransactionscollection
+
+---
+
+#### Owner Transactions
+| Fetch      | API Method                                                                                                         |
+|------------|--------------------------------------------------------------------------------------------------------------------|
+| One        | `$api->getOwnerTransaction( int $ownerId, int $ownerTransactionId )`                                               |
+| Many       | `$api->getOwnerTransactions( int $ownerId, array $queryParams )`                                                   |
+| Collection | `$api->getOwnerTransactionCollections( int $ownerId, array $queryParams )`<br/>*Provides full paged API responses* |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getowneridtransactionscollection-1
 
 ---
 

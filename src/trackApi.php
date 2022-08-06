@@ -4,9 +4,11 @@ namespace elite42\trackpms;
 
 use andrewsauder\jsonDeserialize\exceptions\jsonDeserializeException;
 use elite42\trackpms\types\account;
+use elite42\trackpms\types\accountingItem;
 use elite42\trackpms\types\amenity;
 use elite42\trackpms\types\amenityGroup;
 use elite42\trackpms\types\collection\accountCollection;
+use elite42\trackpms\types\collection\accountingItemCollection;
 use elite42\trackpms\types\collection\amenityCollection;
 use elite42\trackpms\types\collection\amenityGroupCollection;
 use elite42\trackpms\types\collection\companyAttachmentCollection;
@@ -15,6 +17,7 @@ use elite42\trackpms\types\collection\contractCollection;
 use elite42\trackpms\types\collection\customFieldCollection;
 use elite42\trackpms\types\collection\maintenanceWorkOrderCollection;
 use elite42\trackpms\types\collection\ownerCollection;
+use elite42\trackpms\types\collection\ownerTransactionCollection;
 use elite42\trackpms\types\collection\ownerUnitCollection;
 use elite42\trackpms\types\collection\reservationAttachmentCollection;
 use elite42\trackpms\types\collection\reservationCollection;
@@ -23,6 +26,7 @@ use elite42\trackpms\types\collection\reservationNoteCollection;
 use elite42\trackpms\types\collection\reservationRateCollection;
 use elite42\trackpms\types\collection\reservationTypeCollection;
 use elite42\trackpms\types\collection\roleCollection;
+use elite42\trackpms\types\collection\transactionCollection;
 use elite42\trackpms\types\collection\unitBlockCollection;
 use elite42\trackpms\types\collection\unitRoleCollection;
 use elite42\trackpms\types\collection\unitCollection;
@@ -42,6 +46,7 @@ use elite42\trackpms\types\reservationNote;
 use elite42\trackpms\types\reservationRate;
 use elite42\trackpms\types\reservationType;
 use elite42\trackpms\types\role;
+use elite42\trackpms\types\transaction;
 use elite42\trackpms\types\unitBlock;
 use elite42\trackpms\types\unitRole;
 use elite42\trackpms\types\unit;
@@ -53,9 +58,9 @@ class trackApi {
 
 	private trackApiSettings $settings;
 
-	private \Monolog\Logger  $logger;
+	private \Monolog\Logger $logger;
 
-	private trackApiCache    $cache;
+	private trackApiCache $cache;
 
 
 	public function __construct( trackApiSettings $settings ) {
@@ -83,10 +88,10 @@ class trackApi {
 	}
 
 
-	private function buildUrl( string $url, array $queryParams = [] ) : string {
+	private function buildUrl( string $url, array $queryParams = [] ): string {
 		$finalUrl = $url;
 
-		if( count( $queryParams ) > 0 ) {
+		if( count( $queryParams )>0 ) {
 			$appendJoiner = '?';
 			if( str_contains( $url, '?' ) ) {
 				$appendJoiner = '&';
@@ -102,14 +107,14 @@ class trackApi {
 	/**
 	 * Perform a single API call
 	 *
-	 * @param  string    $httpMethod  HTTP Method to use
-	 * @param  string    $apiUrl      Ex: /pms/units?sortColumn=name&sortDirection=asc
-	 * @param  string[]  $params      [optional] Associative array of parameters to pass. DO NOT INCLUDE TOKENS!
+	 * @param string   $httpMethod HTTP Method to use
+	 * @param string   $apiUrl     Ex: /pms/units?sortColumn=name&sortDirection=asc
+	 * @param string[] $params     [optional] Associative array of parameters to pass. DO NOT INCLUDE TOKENS!
 	 *
 	 * @return mixed
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function call( string $httpMethod, string $apiUrl, array $params = [] ) : mixed {
+	public function call( string $httpMethod, string $apiUrl, array $params = [] ): mixed {
 		if( str_starts_with( $apiUrl, 'http' ) ) {
 			$callUrl = $apiUrl;
 		}
@@ -118,9 +123,9 @@ class trackApi {
 		}
 
 		//check the runtime cache and return its value if not null
-		if( $this->settings->isEnableCaching() && strtoupper( $httpMethod ) == 'GET' ) {
+		if( $this->settings->isEnableCaching() && strtoupper( $httpMethod )=='GET' ) {
 			$cacheResponse = $this->cache->get( 'track', $callUrl, $params );
-			if( $cacheResponse !== null ) {
+			if( $cacheResponse!==null ) {
 				if( $this->settings->isDebugLogging() ) {
 					$this->logger->debug( $httpMethod . ' [cached]: ' . $apiUrl, $params );
 				}
@@ -145,20 +150,20 @@ class trackApi {
 			]
 		];
 
-		if( count( $params ) > 0 ) {
-			if( strtoupper( $httpMethod ) === 'GET' ) {
+		if( count( $params )>0 ) {
+			if( strtoupper( $httpMethod )==='GET' ) {
 				$options[ 'query' ] = $params;
 			}
-			elseif( strtoupper( $httpMethod ) === 'POST' ) {
+			elseif( strtoupper( $httpMethod )==='POST' ) {
 				$options[ 'json' ] = $params;
 			}
-			elseif( strtoupper( $httpMethod ) === 'PUT' ) {
+			elseif( strtoupper( $httpMethod )==='PUT' ) {
 				$options[ 'json' ] = $params;
 			}
-			elseif( strtoupper( $httpMethod ) === 'PATCH' ) {
+			elseif( strtoupper( $httpMethod )==='PATCH' ) {
 				$options[ 'json' ] = $params;
 			}
-			elseif( strtoupper( $httpMethod ) === 'DELETE' ) {
+			elseif( strtoupper( $httpMethod )==='DELETE' ) {
 				$options[ 'query' ] = $params;
 			}
 		}
@@ -167,12 +172,12 @@ class trackApi {
 			$response = $client->request( strtoupper( $httpMethod ), $callUrl, $options );
 
 			$body = new \stdClass();
-			if($response->getStatusCode()==200) {
+			if( $response->getStatusCode()==200 ) {
 				$body = json_decode( $response->getBody()->getContents(), false, 512, JSON_THROW_ON_ERROR );
 			}
 
 			//set api cache
-			if( $this->settings->isEnableCaching() && strtoupper( $httpMethod ) == 'GET' ) {
+			if( $this->settings->isEnableCaching() && strtoupper( $httpMethod )=='GET' ) {
 				$this->logger->debug( 'Create cache ' . $httpMethod . ': ' . $apiUrl, $params );
 				$this->cache->set( 'track', $callUrl, $params, $body );
 			}
@@ -192,15 +197,15 @@ class trackApi {
 	 * Perform an API call that will follow top level paging 'next' links until all pages have been requested
 	 * Returns an array where each value is an API response. Array is returned even if there is only one page of results
 	 *
-	 * @param  string    $httpMethod    HTTP Method to use
-	 * @param  string    $apiUrl        Ex: /pms/units
-	 * @param  string[]  $params        Associative array of parameters to pass as json or query params
-	 * @param  array     $apiResponses  Used by the function for recursion - ignore
+	 * @param string   $httpMethod   HTTP Method to use
+	 * @param string   $apiUrl       Ex: /pms/units
+	 * @param string[] $params       Associative array of parameters to pass as json or query params
+	 * @param array    $apiResponses Used by the function for recursion - ignore
 	 *
 	 * @return array
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function callAndFollowPaging( string $httpMethod, string $apiUrl, array $params = [], array $apiResponses = [] ) : array {
+	public function callAndFollowPaging( string $httpMethod, string $apiUrl, array $params = [], array $apiResponses = [] ): array {
 		$apiResponse = $this->call( $httpMethod, $apiUrl, $params );
 
 		$apiResponses[] = $apiResponse;
@@ -214,12 +219,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $unitId
+	 * @param int $unitId
 	 *
 	 * @return \elite42\trackpms\types\unit
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnit( int $unitId ) : types\unit {
+	public function getUnit( int $unitId ): types\unit {
 		$url = $this->buildUrl( '/pms/units/' . $unitId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -234,12 +239,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunits
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getunits
 	 *
 	 * @return \elite42\trackpms\types\unit[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnits( array $queryParams = [] ) : array {
+	public function getUnits( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/units', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\unitCollection[] $apiResponses */
@@ -264,12 +269,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunits
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getunits
 	 *
 	 * @return \elite42\trackpms\types\collection\unitCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnitCollections( array $queryParams = [] ) : array {
+	public function getUnitCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/units', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -290,12 +295,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $reservationId
+	 * @param int $reservationId
 	 *
 	 * @return \elite42\trackpms\types\reservation
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservation( int $reservationId ) : types\reservation {
+	public function getReservation( int $reservationId ): types\reservation {
 		$url = $this->buildUrl( '/pms/reservations/' . $reservationId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -310,12 +315,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getreservations. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservations. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\reservation[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservations( array $queryParams = [] ) : array {
+	public function getReservations( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/reservations', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\reservationCollection[] $apiResponses */
@@ -340,12 +345,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getreservations. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservations. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\reservationCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservationCollections( array $queryParams = [] ) : array {
+	public function getReservationCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/reservations', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -366,13 +371,13 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $reservationId
-	 * @param  int  $reservationFeeId
+	 * @param int $reservationId
+	 * @param int $reservationFeeId
 	 *
 	 * @return \elite42\trackpms\types\reservationFee
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservationFee( int $reservationId, int $reservationFeeId ) : types\reservationFee {
+	public function getReservationFee( int $reservationId, int $reservationFeeId ): types\reservationFee {
 		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/fees/' . $reservationFeeId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -387,12 +392,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $reservationId
+	 * @param int $reservationId
 	 *
 	 * @return \elite42\trackpms\types\reservationFee[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservationFees( int $reservationId ) : array {
+	public function getReservationFees( int $reservationId ): array {
 		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/fees' );
 
 		/** @var \elite42\trackpms\types\collection\reservationFeeCollection[] $apiResponses */
@@ -417,12 +422,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $reservationId
+	 * @param int $reservationId
 	 *
 	 * @return \elite42\trackpms\types\collection\reservationFeeCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservationFeeCollections( int $reservationId ) : array {
+	public function getReservationFeeCollections( int $reservationId ): array {
 		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/fees' );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -443,12 +448,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $reservationId
+	 * @param int $reservationId
 	 *
 	 * @return \elite42\trackpms\types\reservationNote[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservationRates( int $reservationId ) : array {
+	public function getReservationRates( int $reservationId ): array {
 		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/rates' );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -472,13 +477,13 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $reservationId
-	 * @param  int  $reservationNoteId
+	 * @param int $reservationId
+	 * @param int $reservationNoteId
 	 *
 	 * @return \elite42\trackpms\types\reservationNote
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservationNote( int $reservationId, int $reservationNoteId ) : types\reservationNote {
+	public function getReservationNote( int $reservationId, int $reservationNoteId ): types\reservationNote {
 		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/notes/' . $reservationNoteId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -493,12 +498,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $reservationId
+	 * @param int $reservationId
 	 *
 	 * @return \elite42\trackpms\types\reservationNote[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservationNotes( int $reservationId ) : array {
+	public function getReservationNotes( int $reservationId ): array {
 		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/notes' );
 
 		/** @var \elite42\trackpms\types\collection\reservationNoteCollection[] $apiResponses */
@@ -523,12 +528,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $reservationId
+	 * @param int $reservationId
 	 *
 	 * @return \elite42\trackpms\types\collection\reservationNoteCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservationNoteCollections( int $reservationId ) : array {
+	public function getReservationNoteCollections( int $reservationId ): array {
 		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/notes' );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -549,12 +554,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $amenityId
+	 * @param int $amenityId
 	 *
 	 * @return \elite42\trackpms\types\amenity
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getAmenity( int $amenityId ) : types\amenity {
+	public function getAmenity( int $amenityId ): types\amenity {
 		$url = $this->buildUrl( '/pms/units/amenities/' . $amenityId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -569,12 +574,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenities. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenities. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\amenity[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getAmenities( array $queryParams = [] ) : array {
+	public function getAmenities( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/units/amenities', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\amenityCollection[] $apiResponses */
@@ -599,12 +604,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getamenities. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getamenities. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\amenityCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getAmenityCollections( array $queryParams = [] ) : array {
+	public function getAmenityCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/units/amenities', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -625,12 +630,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $amenityGroupId
+	 * @param int $amenityGroupId
 	 *
 	 * @return \elite42\trackpms\types\amenityGroup
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getAmenityGroup( int $amenityGroupId ) : types\amenityGroup {
+	public function getAmenityGroup( int $amenityGroupId ): types\amenityGroup {
 		$url = $this->buildUrl( '/pms/units/amenity-groups/' . $amenityGroupId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -645,12 +650,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenitygroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenitygroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\amenityGroup[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getAmenityGroups( array $queryParams = [] ) : array {
+	public function getAmenityGroups( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/units/amenity-groups', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\amenityGroupCollection[] $apiResponses */
@@ -675,12 +680,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenitygroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getunitamenitygroups. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\amenityGroupCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getAmenityGroupCollections( array $queryParams = [] ) : array {
+	public function getAmenityGroupCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/units/amenity-groups', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -701,12 +706,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $customFieldId
+	 * @param int $customFieldId
 	 *
 	 * @return \elite42\trackpms\types\customField
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getCustomField( int $customFieldId ) : customField {
+	public function getCustomField( int $customFieldId ): customField {
 		$url = $this->buildUrl( '/custom-fields/' . $customFieldId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -721,12 +726,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcustomfields. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcustomfields. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\customField[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getCustomFields( array $queryParams = [] ) : array {
+	public function getCustomFields( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/custom-fields', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\customFieldCollection[] $apiResponses */
@@ -751,12 +756,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcustomfields. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcustomfields. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\customFieldCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getCustomFieldCollections( array $queryParams = [] ) : array {
+	public function getCustomFieldCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/custom-fields', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -777,12 +782,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $maintenanceWorkOrderId
+	 * @param int $maintenanceWorkOrderId
 	 *
 	 * @return \elite42\trackpms\types\maintenanceWorkOrder
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getMaintenanceWorkOrder( int $maintenanceWorkOrderId ) : maintenanceWorkOrder {
+	public function getMaintenanceWorkOrder( int $maintenanceWorkOrderId ): maintenanceWorkOrder {
 		$url = $this->buildUrl( '/pms/maintenance/work-orders/' . $maintenanceWorkOrderId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -797,12 +802,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getmaintworkorders. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getmaintworkorders. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\maintenanceWorkOrder[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getMaintenanceWorkOrders( array $queryParams = [] ) : array {
+	public function getMaintenanceWorkOrders( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/maintenance/work-orders', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\maintenanceWorkOrderCollection[] $apiResponses */
@@ -827,12 +832,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getmaintworkorders. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getmaintworkorders. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\maintenanceWorkOrderCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getMaintenanceWorkOrderCollections( array $queryParams = [] ) : array {
+	public function getMaintenanceWorkOrderCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/maintenance/work-orders', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -853,12 +858,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $ownerId
+	 * @param int $ownerId
 	 *
 	 * @return \elite42\trackpms\types\owner
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getOwner( int $ownerId ) : owner {
+	public function getOwner( int $ownerId ): owner {
 		$url = $this->buildUrl( '/pms/owners/' . $ownerId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -873,12 +878,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getownercollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getownercollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\owner[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getOwners( array $queryParams = [] ) : array {
+	public function getOwners( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/owners', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\ownerCollection[] $apiResponses */
@@ -903,12 +908,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getownercollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getownercollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\ownerCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getOwnerCollections( array $queryParams = [] ) : array {
+	public function getOwnerCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/owners', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -929,12 +934,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $companyId
+	 * @param int $companyId
 	 *
 	 * @return \elite42\trackpms\types\company
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getCompany( int $companyId ) : company {
+	public function getCompany( int $companyId ): company {
 		$url = $this->buildUrl( '/crm/companies/' . $companyId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -949,12 +954,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanycollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanycollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\company[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getCompanies( array $queryParams = [] ) : array {
+	public function getCompanies( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/crm/companies', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\companyCollection[] $apiResponses */
@@ -979,12 +984,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanycollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanycollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\companyCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getCompanyCollections( array $queryParams = [] ) : array {
+	public function getCompanyCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/crm/companies', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -1005,12 +1010,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getownerUnitcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getownerUnitcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\ownerUnit[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getOwnerUnits( int $ownerId, array $queryParams = [] ) : array {
+	public function getOwnerUnits( int $ownerId, array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/owners/' . $ownerId . '/units', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\ownerUnitCollection[] $apiResponses */
@@ -1035,12 +1040,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $contractId
+	 * @param int $contractId
 	 *
 	 * @return \elite42\trackpms\types\contract
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getContract( int $contractId ) : contract {
+	public function getContract( int $contractId ): contract {
 		$url = $this->buildUrl( '/pms/owners/contracts/' . $contractId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -1055,12 +1060,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcontractcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcontractcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\contract[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getContracts( array $queryParams = [] ) : array {
+	public function getContracts( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/owners/contracts', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\contractCollection[] $apiResponses */
@@ -1085,12 +1090,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcontractcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcontractcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\contractCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getContractCollections( array $queryParams = [] ) : array {
+	public function getContractCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/owners/contracts', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -1111,12 +1116,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $unitRoleId
+	 * @param int $unitRoleId
 	 *
 	 * @return \elite42\trackpms\types\unitRole
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnitRole( int $unitRoleId ) : unitRole {
+	public function getUnitRole( int $unitRoleId ): unitRole {
 		$url = $this->buildUrl( '/pms/units/roles/' . $unitRoleId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -1131,12 +1136,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getrolecollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getrolecollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\unitRole[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnitRoles( array $queryParams = [] ) : array {
+	public function getUnitRoles( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/units/roles', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\unitRoleCollection[] $apiResponses */
@@ -1161,12 +1166,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getrolecollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getrolecollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\unitRoleCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnitRoleCollections( array $queryParams = [] ) : array {
+	public function getUnitRoleCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/units/roles', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -1187,12 +1192,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $userId
+	 * @param int $userId
 	 *
 	 * @return \elite42\trackpms\types\unitRole
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUser( int $userId ) : unitRole {
+	public function getUser( int $userId ): unitRole {
 		$url = $this->buildUrl( '/user/' . $userId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -1207,12 +1212,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\user[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUsers( array $queryParams = [] ) : array {
+	public function getUsers( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/users', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\userCollection[] $apiResponses */
@@ -1237,12 +1242,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\userCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUserCollections( array $queryParams = [] ) : array {
+	public function getUserCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/users', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -1263,12 +1268,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $roleId
+	 * @param int $roleId
 	 *
 	 * @return \elite42\trackpms\types\unitRole
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getRole( int $roleId ) : unitRole {
+	public function getRole( int $roleId ): unitRole {
 		$url = $this->buildUrl( '/role/' . $roleId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -1283,12 +1288,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\role[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getRoles( array $queryParams = [] ) : array {
+	public function getRoles( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/roles', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\roleCollection[] $apiResponses */
@@ -1313,12 +1318,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getrolecollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getrolecollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\roleCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getRoleCollections( array $queryParams = [] ) : array {
+	public function getRoleCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/roles', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -1339,12 +1344,12 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $reservationTypeId
+	 * @param int $reservationTypeId
 	 *
 	 * @return \elite42\trackpms\types\reservationType
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservationType( int $reservationTypeId ) : reservationType {
+	public function getReservationType( int $reservationTypeId ): reservationType {
 		$url = $this->buildUrl( '/pms/reservations/types/' . $reservationTypeId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -1359,12 +1364,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\reservationType[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservationTypes( array $queryParams = [] ) : array {
+	public function getReservationTypes( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/reservations/types', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\reservationTypeCollection[] $apiResponses */
@@ -1389,12 +1394,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getreservationTypecollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservationTypecollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\reservationTypeCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservationTypeCollections( array $queryParams = [] ) : array {
+	public function getReservationTypeCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/reservations/types', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -1415,13 +1420,13 @@ class trackApi {
 
 
 	/**
-	 * @param  int  $companyId
-	 * @param  int  $attachmentId
+	 * @param int $companyId
+	 * @param int $attachmentId
 	 *
 	 * @return \elite42\trackpms\types\companyAttachment
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getCompanyAttachment( int $companyId, int $attachmentId ) : companyAttachment {
+	public function getCompanyAttachment( int $companyId, int $attachmentId ): companyAttachment {
 		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments/' . $attachmentId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -1436,13 +1441,13 @@ class trackApi {
 
 
 	/**
-	 * @param  int    $companyId
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param int   $companyId
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\companyAttachment[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getCompanyAttachments( int $companyId, array $queryParams = [] ) : array {
+	public function getCompanyAttachments( int $companyId, array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\companyAttachmentCollection[] $apiResponses */
@@ -1467,13 +1472,13 @@ class trackApi {
 
 
 	/**
-	 * @param  int    $companyId
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanyAttachmentcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param int   $companyId
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanyAttachmentcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\companyAttachmentCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getCompanyAttachmentCollections( int $companyId, array $queryParams = [] ) : array {
+	public function getCompanyAttachmentCollections( int $companyId, array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -1493,14 +1498,13 @@ class trackApi {
 	}
 
 
-
 	/**
-	 * @param  int  $unitBlockId
+	 * @param int $unitBlockId
 	 *
 	 * @return \elite42\trackpms\types\unitBlock
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnitBlock( int $unitBlockId ) : unitBlock {
+	public function getUnitBlock( int $unitBlockId ): unitBlock {
 		$url = $this->buildUrl( '/pms/unit-blocks/' . $unitBlockId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -1515,13 +1519,13 @@ class trackApi {
 
 
 	/**
-	 * @param  int    $companyId
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param int   $companyId
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\unitBlock[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnitBlocks( array $queryParams = [] ) : array {
+	public function getUnitBlocks( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/unit-blocks', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\unitBlockCollection[] $apiResponses */
@@ -1546,13 +1550,13 @@ class trackApi {
 
 
 	/**
-	 * @param  int    $companyId
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getunitBlockcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param int   $companyId
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getunitBlockcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\unitBlockCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getUnitBlockCollections( array $queryParams = [] ) : array {
+	public function getUnitBlockCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/unit-blocks', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -1573,16 +1577,16 @@ class trackApi {
 
 
 	/**
-	 * @param  int     $companyId
-	 * @param  string  $fileData  Base 64 encoded data
-	 * @param  string  $name      Attachment name, will default to file name if empty string
-	 * @param  bool    $isPublic
-	 * @param  string  $originalFilename
+	 * @param int    $companyId
+	 * @param string $fileData Base 64 encoded data
+	 * @param string $name     Attachment name, will default to file name if empty string
+	 * @param bool   $isPublic
+	 * @param string $originalFilename
 	 *
 	 * @return \elite42\trackpms\types\companyAttachment
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function createCompanyAttachment( int $companyId, string $fileData, string $name, bool $isPublic, string $originalFilename ) : companyAttachment {
+	public function createCompanyAttachment( int $companyId, string $fileData, string $name, bool $isPublic, string $originalFilename ): companyAttachment {
 		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments' );
 
 		$body = [
@@ -1604,20 +1608,20 @@ class trackApi {
 
 
 	/**
-	 * @param  int     $companyId
-	 * @param  int     $attachmentId
-	 * @param  string  $name  Attachment name, will default to file name if empty string
-	 * @param  bool    $isPublic
+	 * @param int    $companyId
+	 * @param int    $attachmentId
+	 * @param string $name Attachment name, will default to file name if empty string
+	 * @param bool   $isPublic
 	 *
 	 * @return \elite42\trackpms\types\companyAttachment
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function updateCompanyAttachment( int $companyId, int $attachmentId, string $name, bool $isPublic ) : companyAttachment {
-		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments/'. $attachmentId );
+	public function updateCompanyAttachment( int $companyId, int $attachmentId, string $name, bool $isPublic ): companyAttachment {
+		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments/' . $attachmentId );
 
 		$body = [
-			'name'             => $name,
-			'isPublic'         => $isPublic
+			'name'     => $name,
+			'isPublic' => $isPublic
 		];
 
 		$apiResponse = $this->call( 'PATCH', $url, $body );
@@ -1632,14 +1636,14 @@ class trackApi {
 
 
 	/**
-	 * @param  int     $companyId
-	 * @param  int     $attachmentId
+	 * @param int $companyId
+	 * @param int $attachmentId
 	 *
 	 * @return bool
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function deleteCompanyAttachment( int $companyId, int $attachmentId ) : bool {
-		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments/'. $attachmentId );
+	public function deleteCompanyAttachment( int $companyId, int $attachmentId ): bool {
+		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/attachments/' . $attachmentId );
 
 		$apiResponse = $this->call( 'DELETE', $url );
 
@@ -1648,14 +1652,14 @@ class trackApi {
 
 
 	/**
-	 * @param  int    $reservationId
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param int   $reservationId
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\reservationAttachment[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservationAttachments( int $reservationId, array $queryParams = [] ) : array {
-		$url = $this->buildUrl( '/pms/reservations/'.$reservationId.'/attachments', $queryParams );
+	public function getReservationAttachments( int $reservationId, array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/attachments', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\reservationAttachmentCollection[] $apiResponses */
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -1679,14 +1683,14 @@ class trackApi {
 
 
 	/**
-	 * @param  int    $reservationId
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getreservationAttachmentcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param int   $reservationId
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservationAttachmentcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
 	 * @return \elite42\trackpms\types\collection\reservationAttachmentCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getReservationAttachmentCollections( int $reservationId, array $queryParams = [] ) : array {
-		$url = $this->buildUrl( '/pms/reservations/'.$reservationId.'/attachments', $queryParams );
+	public function getReservationAttachmentCollections( int $reservationId, array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/attachments', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
 
@@ -1714,8 +1718,8 @@ class trackApi {
 	 * @return \elite42\trackpms\types\reservationAttachment
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function createReservationAttachment( int $reservationId, string $fileData, string $name, string $type, string $originalFilename ) : reservationAttachment {
-		$url = $this->buildUrl( '/pms/reservations/'.$reservationId.'/attachments' );
+	public function createReservationAttachment( int $reservationId, string $fileData, string $name, string $type, string $originalFilename ): reservationAttachment {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/attachments' );
 
 		$body = [
 			'fileData'         => $fileData,
@@ -1736,18 +1740,18 @@ class trackApi {
 
 
 	/**
-	 * @param  int     $reservationId
-	 * @param  int     $attachmentId
-	 * @param  string  $name  Attachment name, will default to file name if empty string
+	 * @param int    $reservationId
+	 * @param int    $attachmentId
+	 * @param string $name Attachment name, will default to file name if empty string
 	 *
 	 * @return \elite42\trackpms\types\reservationAttachment
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function updateReservationAttachment( int $reservationId, int $attachmentId, string $name ) : reservationAttachment {
-		$url = $this->buildUrl( '/pms/reservations/'.$reservationId.'/attachments/'. $attachmentId );
+	public function updateReservationAttachment( int $reservationId, int $attachmentId, string $name ): reservationAttachment {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/attachments/' . $attachmentId );
 
 		$body = [
-			'name'             => $name
+			'name' => $name
 		];
 
 		$apiResponse = $this->call( 'PATCH', $url, $body );
@@ -1762,14 +1766,14 @@ class trackApi {
 
 
 	/**
-	 * @param  int     $reservationId
-	 * @param  int     $attachmentId
+	 * @param int $reservationId
+	 * @param int $attachmentId
 	 *
 	 * @return bool
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function deleteReservationAttachment( int $reservationId, int $attachmentId ) : bool {
-		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/attachments/'. $attachmentId );
+	public function deleteReservationAttachment( int $reservationId, int $attachmentId ): bool {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/attachments/' . $attachmentId );
 
 		$apiResponse = $this->call( 'DELETE', $url );
 
@@ -1777,12 +1781,12 @@ class trackApi {
 	}
 
 	/**
-	 * @param  int  $categoryId
+	 * @param int $categoryId
 	 *
-	 * @return \elite42\trackpms\types\company
+	 * @return \elite42\trackpms\types\itemCategory
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getItemCategory( int $categoryId ) : company {
+	public function getItemCategory( int $categoryId ): itemCategory {
 		$url = $this->buildUrl( '/pms/accounting/items/categories/' . $categoryId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -1797,12 +1801,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanycollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanycollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
-	 * @return \elite42\trackpms\types\company[]
+	 * @return \elite42\trackpms\types\itemCategory[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getItemCategories( array $queryParams = [] ) : array {
+	public function getItemCategories( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/accounting/items/categories', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\itemCategoryCollection[] $apiResponses */
@@ -1826,13 +1830,12 @@ class trackApi {
 	}
 
 	/**
-	 * @param  int    $catId
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getreservationAttachmentcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservationAttachmentcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
-	 * @return \elite42\trackpms\types\collection\reservationAttachmentCollection[]
+	 * @return \elite42\trackpms\types\collection\itemCategoryCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getItemCategoryCollections( array $queryParams = [] ) : array {
+	public function getItemCategoryCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/accounting/items/categories', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -1852,12 +1855,12 @@ class trackApi {
 	}
 
 	/**
-	 * @param  int  $accountId
+	 * @param int $accountId
 	 *
-	 * @return \elite42\trackpms\types\company
+	 * @return \elite42\trackpms\types\account
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getAccount( int $accountId ) : company {
+	public function getAccount( int $accountId ): account {
 		$url = $this->buildUrl( '/pms/accounting/accounts/' . $accountId );
 
 		$apiResponse = $this->call( 'GET', $url );
@@ -1872,12 +1875,12 @@ class trackApi {
 
 
 	/**
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanycollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanycollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
-	 * @return \elite42\trackpms\types\company[]
+	 * @return \elite42\trackpms\types\account[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getAccounts( array $queryParams = [] ) : array {
+	public function getAccounts( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/accounting/accounts', $queryParams );
 
 		/** @var \elite42\trackpms\types\collection\accountCollection[] $apiResponses */
@@ -1901,13 +1904,12 @@ class trackApi {
 	}
 
 	/**
-	 * @param  int    $catId
-	 * @param  array  $queryParams  Key value pairs of track api query params https://developer.trackhs.com/reference/getreservationAttachmentcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservationAttachmentcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
 	 *
-	 * @return \elite42\trackpms\types\collection\reservationAttachmentCollection[]
+	 * @return \elite42\trackpms\types\collection\accountCollection[]
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function getAccountCollections( array $queryParams = [] ) : array {
+	public function getAccountCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/accounting/accounts', $queryParams );
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -1925,4 +1927,229 @@ class trackApi {
 
 		return $collections;
 	}
+
+	/**
+	 * @param int $accountingItemId
+	 *
+	 * @return \elite42\trackpms\types\accountingItem
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getAccountingItem( int $accountingItemId ): accountingItem {
+		$url = $this->buildUrl( '/pms/accounting/items/' . $accountingItemId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return accountingItem::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\accountingItem', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanycollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\accountingItem[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getAccountingItems( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/accounting/items', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\accountingItemCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$companies = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->items ) ) {
+					foreach( $apiResponse->_embedded?->items as $company ) {
+						$companies[] = accountingItem::jsonDeserialize( $company );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\company', 500, $e );
+		}
+
+		return $companies;
+	}
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservationAttachmentcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\accountingItemCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getAccountingItemCollections( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/accounting/items', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$collections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$collections[] = accountingItemCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationAttachmentCollection', 500, $e );
+			}
+		}
+
+		return $collections;
+	}
+
+	/**
+	 * @param int $transactionId
+	 *
+	 * @return \elite42\trackpms\types\transaction
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getTransaction( int $transactionId ): transaction {
+		$url = $this->buildUrl( '/pms/accounting/transactions/' . $transactionId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return transaction::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\transaction', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanycollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\transaction[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getTransactions( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/accounting/transactions', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\transactionCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$companies = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->transactions ) ) {
+					foreach( $apiResponse->_embedded?->transactions as $company ) {
+						$companies[] = transaction::jsonDeserialize( $company );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\company', 500, $e );
+		}
+
+		return $companies;
+	}
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservationAttachmentcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\transactionCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getTransactionCollections( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/accounting/transactions', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$collections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$collections[] = transactionCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationAttachmentCollection', 500, $e );
+			}
+		}
+
+		return $collections;
+	}
+
+	/**
+	 * @param int $ownerId
+	 * @param int $ownerTransactionId
+	 *
+	 * @return \elite42\trackpms\types\transaction
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getOwnerTransaction( int $ownerId, int $ownerTransactionId ): transaction {
+		$url = $this->buildUrl( '/pms/owners/' . $ownerId . '/transactions/' . $ownerTransactionId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return transaction::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\ownerTransaction', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanycollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\transaction[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getOwnerTransactions( int $ownerId, array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/owners/' . $ownerId . '/transactions', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\ownerTransactionCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$companies = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->ownerTransactions ) ) {
+					foreach( $apiResponse->_embedded?->ownerTransactions as $company ) {
+						$companies[] = transaction::jsonDeserialize( $company );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\company', 500, $e );
+		}
+
+		return $companies;
+	}
+
+	/**
+	 * @param int   $ownerId
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservationAttachmentcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\ownerTransactionCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getOwnerTransactionCollections( int $ownerId, array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/owners/' . $ownerId . '/transactions', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$collections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$collections[] = ownerTransactionCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationAttachmentCollection', 500, $e );
+			}
+		}
+
+		return $collections;
+	}
+
 }
