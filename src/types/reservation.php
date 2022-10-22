@@ -20,6 +20,8 @@ class reservation
 
 	public ?\DateTimeImmutable                                      $departureDate            = null;
 
+    public ?\DateTimeImmutable                                      $fetchedDate              = null;
+
 	public bool                                                     $earlyArrival             = false;
 
 	public bool                                                     $lateDeparture            = false;
