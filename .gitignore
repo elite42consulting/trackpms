@@ -2,3 +2,6 @@ composer.phar
 /vendor/
 composer.lock
 /.idea
+/nbproject/private/
+nbproject/project.xml
+nbproject/project.properties
