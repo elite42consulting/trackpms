@@ -32,4 +32,7 @@ class unitEmbedded
 	/** @var \elite42\trackpms\types\owner[] */
 	public array $owners = [];
 
+	/** @var \elite42\trackpms\types\contact[] */
+	public array $contacts = [];
+
 }

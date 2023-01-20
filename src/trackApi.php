@@ -13,6 +13,7 @@ use elite42\trackpms\types\collection\amenityCollection;
 use elite42\trackpms\types\collection\amenityGroupCollection;
 use elite42\trackpms\types\collection\companyAttachmentCollection;
 use elite42\trackpms\types\collection\companyCollection;
+use elite42\trackpms\types\collection\contactCollection;
 use elite42\trackpms\types\collection\contractCollection;
 use elite42\trackpms\types\collection\customFieldCollection;
 use elite42\trackpms\types\collection\maintenanceWorkOrderCollection;
@@ -33,6 +34,7 @@ use elite42\trackpms\types\collection\unitCollection;
 use elite42\trackpms\types\collection\userCollection;
 use elite42\trackpms\types\company;
 use elite42\trackpms\types\companyAttachment;
+use elite42\trackpms\types\contact;
 use elite42\trackpms\types\contract;
 use elite42\trackpms\types\customField;
 use elite42\trackpms\types\itemCategory;
@@ -2150,6 +2152,160 @@ class trackApi {
 		}
 
 		return $collections;
+	}
+
+	/**
+	 * @param int $contactId
+	 *
+	 * @return \elite42\trackpms\types\transaction
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getContact( int $contactId ): transaction {
+		$url = $this->buildUrl( '/crm/contact/' . $contactId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return transaction::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\contact', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcontacts. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\contact[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getContacts( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/crm/contacts', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\contactCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$contacts = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->contacts ) ) {
+					foreach( $apiResponse->_embedded?->contacts as $company ) {
+						$contacts[] = contact::jsonDeserialize( $company );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\contact', 500, $e );
+		}
+
+		return $contacts;
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservationAttachmentcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\contactCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getContactCollections( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/crm/contacts', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$collections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$collections[] = contactCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\contactCollection', 500, $e );
+			}
+		}
+
+		return $collections;
+	}
+
+
+	/**
+	 * @param int $companyId
+	 * @param int $contactId
+	 *
+	 * @return \elite42\trackpms\types\companyContact
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getCompanyContact( int $companyId, int $contactId ): \elite42\trackpms\types\companyContact {
+		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/contacts/' . $contactId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return \elite42\trackpms\types\companyContact::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\companyContact', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param int   $companyId
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/discuss/61fd3729f5da3f029bb47f4c. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\companyContact[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getCompanyContacts( int $companyId, array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/contacts', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\companyContactCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$companyContacts = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->contacts ) ) {
+					foreach( $apiResponse->_embedded?->contacts as $companyContact ) {
+						$companyContacts[] = \elite42\trackpms\types\companyContact::jsonDeserialize( $companyContact );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\companyContact', 500, $e );
+		}
+
+		return $companyContacts;
+	}
+
+
+	/**
+	 * @param int   $companyId
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanyContactcollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\companyContactCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getCompanyContactCollections( int $companyId, array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/crm/companies/' . $companyId . '/contacts', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$companyContactCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$companyContactCollections[] = \elite42\trackpms\types\collection\companyContactCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\companyContactCollection', 500, $e );
+			}
+		}
+
+		return $companyContactCollections;
 	}
 
 }
