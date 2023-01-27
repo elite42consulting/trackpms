@@ -27,6 +27,7 @@ use elite42\trackpms\types\collection\reservationNoteCollection;
 use elite42\trackpms\types\collection\reservationRateCollection;
 use elite42\trackpms\types\collection\reservationTypeCollection;
 use elite42\trackpms\types\collection\roleCollection;
+use elite42\trackpms\types\collection\statementCollection;
 use elite42\trackpms\types\collection\transactionCollection;
 use elite42\trackpms\types\collection\unitBlockCollection;
 use elite42\trackpms\types\collection\unitRoleCollection;
@@ -48,6 +49,7 @@ use elite42\trackpms\types\reservationNote;
 use elite42\trackpms\types\reservationRate;
 use elite42\trackpms\types\reservationType;
 use elite42\trackpms\types\role;
+use elite42\trackpms\types\statement;
 use elite42\trackpms\types\transaction;
 use elite42\trackpms\types\unitBlock;
 use elite42\trackpms\types\unitRole;
@@ -180,7 +182,7 @@ class trackApi {
 
 			//set api cache
 			if( $this->settings->isEnableCaching() && strtoupper( $httpMethod )=='GET' ) {
-				$this->logger->debug( 'Create cache ' . $httpMethod . ': ' . $apiUrl, $params );
+				$this->logger->debug( 'Create cache ' . $httpMethod . ': ' . $callUrl, $params );
 				$this->cache->set( 'track', $callUrl, $params, $body );
 			}
 
@@ -219,6 +221,40 @@ class trackApi {
 		return $apiResponses;
 	}
 
+	private function getCacheResponse( string $method, string $url) {
+		if( $this->settings->isEnableCaching() ) {
+			if( str_starts_with( $url, 'http' ) ) {
+				$callUrl = $url;
+			}
+			else {
+				$callUrl = $this->settings->getUrl() . $url;
+			}
+
+			$cacheResponse = $this->cache->get( 'track', $method.$callUrl, [] );
+			if( $cacheResponse!==null ) {
+				if( $this->settings->isDebugLogging() ) {
+					$this->logger->debug( $method.' [cached]'. $callUrl );
+				}
+				return $cacheResponse;
+			}
+		}
+		return null;
+	}
+	private function createCacheResponse( string $method, string $url, mixed $value ) {
+		//set api cache
+		if( $this->settings->isEnableCaching() ) {
+			if( str_starts_with( $url, 'http' ) ) {
+				$callUrl = $url;
+			}
+			else {
+				$callUrl = $this->settings->getUrl() . $url;
+			}
+
+			$this->logger->debug( 'Create cache '.$method.': '.$callUrl, [] );
+			$this->cache->set( 'track', $method.$callUrl, [], $value );
+		}
+	}
+
 
 	/**
 	 * @param int $unitId
@@ -229,14 +265,24 @@ class trackApi {
 	public function getUnit( int $unitId ): types\unit {
 		$url = $this->buildUrl( '/pms/units/' . $unitId );
 
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $url );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
 		$apiResponse = $this->call( 'GET', $url );
 
 		try {
-			return unit::jsonDeserialize( $apiResponse );
+			$unit = unit::jsonDeserialize( $apiResponse );
 		}
 		catch( jsonDeserializeException $e ) {
 			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\unit', 500, $e );
 		}
+
+		$this->createCacheResponse( __METHOD__, $url, $unit);
+
+		return $unit;
+
 	}
 
 
@@ -248,6 +294,11 @@ class trackApi {
 	 */
 	public function getUnits( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/units', $queryParams );
+
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $url );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
 
 		/** @var \elite42\trackpms\types\collection\unitCollection[] $apiResponses */
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -266,6 +317,9 @@ class trackApi {
 			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\unit', 500, $e );
 		}
 
+
+		$this->createCacheResponse( __METHOD__, $url, $units );
+
 		return $units;
 	}
 
@@ -278,6 +332,11 @@ class trackApi {
 	 */
 	public function getUnitCollections( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/units', $queryParams );
+
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $url );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
 
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
 
@@ -292,7 +351,109 @@ class trackApi {
 			}
 		}
 
+		$this->createCacheResponse( __METHOD__, $url, $unitCollections );
+
 		return $unitCollections;
+	}
+
+	/**
+	 * @param int $statementId
+	 *
+	 * @return \elite42\trackpms\types\statement
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getStatement( int $statementId ): types\statement {
+		$url = $this->buildUrl( '/pms/owners/statements/' . $statementId );
+
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $url );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			$statement = statement::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\statement', 500, $e );
+		}
+
+		$this->createCacheResponse( __METHOD__, $url, $statement);
+
+		return $statement;
+
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getstatements
+	 *
+	 * @return \elite42\trackpms\types\statement[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getStatements( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/owners/statements', $queryParams );
+
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $url );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
+		/** @var \elite42\trackpms\types\collection\statementCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$statements = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->statements ) ) {
+					foreach( $apiResponse->_embedded?->statements as $statement ) {
+						$statements[] = statement::jsonDeserialize( $statement );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\statement', 500, $e );
+		}
+
+
+		$this->createCacheResponse( __METHOD__, $url, $statements );
+
+		return $statements;
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getstatements
+	 *
+	 * @return \elite42\trackpms\types\collection\statementCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getStatementCollections( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/owners/statements', $queryParams );
+
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $url );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$statementCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$statementCollections[] = statementCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\statementCollection', 500, $e );
+			}
+		}
+
+		$this->createCacheResponse( __METHOD__, $url, $statementCollections );
+
+		return $statementCollections;
 	}
 
 
@@ -305,14 +466,23 @@ class trackApi {
 	public function getReservation( int $reservationId ): types\reservation {
 		$url = $this->buildUrl( '/pms/reservations/' . $reservationId );
 
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $url );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
 		$apiResponse = $this->call( 'GET', $url );
 
 		try {
-			return reservation::jsonDeserialize( $apiResponse );
+			$reservation =  reservation::jsonDeserialize( $apiResponse );
 		}
 		catch( jsonDeserializeException $e ) {
 			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservation', 500, $e );
 		}
+
+		$this->createCacheResponse( __METHOD__, $url, $reservation );
+
+		return $reservation;
 	}
 
 
@@ -324,6 +494,11 @@ class trackApi {
 	 */
 	public function getReservations( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/reservations', $queryParams );
+
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $url );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
 
 		/** @var \elite42\trackpms\types\collection\reservationCollection[] $apiResponses */
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
@@ -341,6 +516,9 @@ class trackApi {
 		catch( jsonDeserializeException $e ) {
 			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservation', 500, $e );
 		}
+
+		$this->createCacheResponse( __METHOD__, $url, $reservations );
+
 
 		return $reservations;
 	}
@@ -1959,6 +2137,11 @@ class trackApi {
 	public function getAccountingItems( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/accounting/items', $queryParams );
 
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $url );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
 		/** @var \elite42\trackpms\types\collection\accountingItemCollection[] $apiResponses */
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
 
@@ -1975,6 +2158,8 @@ class trackApi {
 		catch( jsonDeserializeException $e ) {
 			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\company', 500, $e );
 		}
+
+		$this->createCacheResponse( __METHOD__, $url, $companies );
 
 		return $companies;
 	}
@@ -2050,7 +2235,41 @@ class trackApi {
 			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\company', 500, $e );
 		}
 
+		$this->createCacheResponse( __METHOD__, $url, $companies );
+
 		return $companies;
+	}
+
+	/**
+	 * @param int $statementId
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getcompanycollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\transaction[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getStatementTransactions( int $statementId, array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/owners/statements/'.$statementId.'/transactions', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\transactionCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$transactions = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->transactions ) ) {
+					foreach( $apiResponse->_embedded?->transactions as $company ) {
+						$transactions[] = transaction::jsonDeserialize( $company );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\transaction', 500, $e );
+		}
+
+		$this->createCacheResponse( __METHOD__, $url, $transactions );
+
+		return $transactions;
 	}
 
 	/**
@@ -2108,6 +2327,11 @@ class trackApi {
 	public function getOwnerTransactions( int $ownerId, array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/owners/' . $ownerId . '/transactions', $queryParams );
 
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $url );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
 		/** @var \elite42\trackpms\types\collection\ownerTransactionCollection[] $apiResponses */
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
 
@@ -2124,6 +2348,8 @@ class trackApi {
 		catch( jsonDeserializeException $e ) {
 			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\company', 500, $e );
 		}
+
+		$this->createCacheResponse( __METHOD__, $url, $companies );
 
 		return $companies;
 	}
@@ -2183,6 +2409,11 @@ class trackApi {
 	public function getContacts( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/crm/contacts', $queryParams );
 
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $url );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
 		/** @var \elite42\trackpms\types\collection\contactCollection[] $apiResponses */
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
 
@@ -2199,6 +2430,8 @@ class trackApi {
 		catch( jsonDeserializeException $e ) {
 			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\contact', 500, $e );
 		}
+
+		$this->createCacheResponse( __METHOD__, $url, $contacts );
 
 		return $contacts;
 	}
