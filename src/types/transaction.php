@@ -2,7 +2,6 @@
 
 namespace elite42\trackpms\types;
 
-
 /**
  * @see https://developer.trackhs.com/reference/getowneridtransactionscollection-1
  * @see https://developer.trackhs.com/reference/getowneridtransactionscollection
@@ -15,12 +14,13 @@ class transaction
 	public string              $type          = '';
 	public bool                $isPending     = false;
 	public bool                $isDeferred    = false;
-	public ?\DateTimeImmutable              $txnDate       = null;
+	public ?\DateTimeImmutable $txnDate       = null;
 	public string              $reference     = '';
 	public ?int                $externalId    = null;
 	public string              $currency      = '';
 	public bool                $isVoided      = false;
 	public ?int                $parentId      = null;
+	public ?int                $unitId        = null;
 	public ?int                $contactId     = null;
 	public ?int                $companyId     = null;
 	public ?int                $workOrderId   = null;
@@ -56,7 +56,6 @@ class transaction
 	public array $lines = [];
 
 	public ?\elite42\trackpms\types\transaction\transactionEmbedded $_embedded = null;
-
 
 	public ?\elite42\trackpms\types\_envelope\_links $_links = null;
 
