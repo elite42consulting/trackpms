@@ -19,12 +19,10 @@ use elite42\trackpms\types\collection\customFieldCollection;
 use elite42\trackpms\types\collection\maintenanceWorkOrderCollection;
 use elite42\trackpms\types\collection\ownerCollection;
 use elite42\trackpms\types\collection\ownerTransactionCollection;
-use elite42\trackpms\types\collection\ownerUnitCollection;
 use elite42\trackpms\types\collection\reservationAttachmentCollection;
 use elite42\trackpms\types\collection\reservationCollection;
 use elite42\trackpms\types\collection\reservationFeeCollection;
 use elite42\trackpms\types\collection\reservationNoteCollection;
-use elite42\trackpms\types\collection\reservationRateCollection;
 use elite42\trackpms\types\collection\reservationTypeCollection;
 use elite42\trackpms\types\collection\roleCollection;
 use elite42\trackpms\types\collection\statementCollection;
@@ -2218,6 +2216,11 @@ class trackApi {
 	public function getTransactions( array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/accounting/transactions', $queryParams );
 
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $url );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
 		/** @var \elite42\trackpms\types\collection\transactionCollection[] $apiResponses */
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
 
@@ -2249,6 +2252,11 @@ class trackApi {
 	 */
 	public function getStatementTransactions( int $statementId, array $queryParams = [] ): array {
 		$url = $this->buildUrl( '/pms/owners/statements/'.$statementId.'/transactions', $queryParams );
+
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $url );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
 
 		/** @var \elite42\trackpms\types\collection\transactionCollection[] $apiResponses */
 		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
