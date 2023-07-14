@@ -116,7 +116,7 @@ class trackApi {
 	 * @return mixed
 	 * @throws \elite42\trackpms\trackException
 	 */
-	public function call( string $httpMethod, string $apiUrl, array $params = [] ): mixed {
+	public function call( string $httpMethod, string $apiUrl, array $params = [], int $_attempt=1 ): mixed {
 		if( str_starts_with( $apiUrl, 'http' ) ) {
 			$callUrl = $apiUrl;
 		}
@@ -186,10 +186,13 @@ class trackApi {
 
 			return $body;
 		}
-		catch( GuzzleException $e ) {
-			throw new trackException( $e->getMessage(), $e->getCode(), $e );
-		}
-		catch( \JsonException $e ) {
+		catch( GuzzleException|\JsonException $e ) {
+			if($_attempt<3) {
+				error_log($httpMethod.' '.$apiUrl.' failed: '.$e->getCode().' '.$e->getMessage());
+				error_log('--waiting 3 seconds and then sending request again');
+				sleep(3);
+				return $this->call( $httpMethod, $apiUrl, $params, $_attempt+1 );
+			}
 			throw new trackException( $e->getMessage(), $e->getCode(), $e );
 		}
 	}
