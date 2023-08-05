@@ -50,6 +50,7 @@ use elite42\trackpms\types\role;
 use elite42\trackpms\types\statement;
 use elite42\trackpms\types\transaction;
 use elite42\trackpms\types\unitBlock;
+use elite42\trackpms\types\unitPricing;
 use elite42\trackpms\types\unitRole;
 use elite42\trackpms\types\unit;
 use elite42\trackpms\types\user;
@@ -1369,6 +1370,25 @@ class trackApi {
 		}
 
 		return $roleCollections;
+	}
+
+	/**
+	 * @param int $unitId
+	 *
+	 * @return \elite42\trackpms\types\unitPricing
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getUnitPricing( int $unitId ): unitPricing {
+		$url = $this->buildUrl( '/pms/units/' . $unitId .'/pricing/' );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return unitPricing::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\role', 500, $e );
+		}
 	}
 
 

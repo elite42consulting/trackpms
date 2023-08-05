@@ -106,6 +106,15 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 
 ---
 
+#### Unit Pricing
+| Fetch        | API Method                            |
+|--------------|---------------------------------------|
+| Unit Pricing | `$api->getUnitPricing( int $unitId )` |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getunitpricing
+
+---
+
 ### Reservations
 | Fetch             | API Method                                                                                      |
 |-------------------|-------------------------------------------------------------------------------------------------|
