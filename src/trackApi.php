@@ -8,6 +8,7 @@ use elite42\trackpms\types\accountingItem;
 use elite42\trackpms\types\amenity;
 use elite42\trackpms\types\amenityGroup;
 use elite42\trackpms\types\availableFee;
+use elite42\trackpms\types\charge;
 use elite42\trackpms\types\collection\accountCollection;
 use elite42\trackpms\types\collection\accountingItemCollection;
 use elite42\trackpms\types\collection\amenityCollection;
@@ -2602,4 +2603,40 @@ class trackApi {
 		return $companyContactCollections;
 	}
 
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getreservations. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\charge[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getCharges( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/charges', $queryParams );
+
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $url );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
+		/** @var \elite42\trackpms\types\collection\reservationCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$charges = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->charges ) ) {
+					foreach( $apiResponse->_embedded?->charges as $charge ) {
+						$charges[] = charge::jsonDeserialize( $charge );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservation', 500, $e );
+		}
+
+		$this->createCacheResponse( __METHOD__, $url, $charges );
+
+
+		return $charges;
+	}
 }
