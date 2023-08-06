@@ -127,11 +127,12 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 ---
 
 #### Reservation Fees
-| Fetch                               | API Method                                                                                         |
-|-------------------------------------|----------------------------------------------------------------------------------------------------|
-| One Specific Reservation Fee        | `$api->getReservationFee( int $reservationId, int $reservationFeeId )`                             |
-| All Fees for Reservation            | `$api->getReservationFees( int $reservationId )`                                                   |
-| Collection of Fees for Reservation  | `$api->getReservationFeeCollections( int $reservationId )`<br/>*Provides full paged API responses* |
+| Fetch                              | API Method                                                                                         |
+|------------------------------------|----------------------------------------------------------------------------------------------------|
+| One Specific Reservation Fee       | `$api->getReservationFee( int $reservationId, int $reservationFeeId )`                             |
+| All Fees for Reservation           | `$api->getReservationFees( int $reservationId )`                                                   |
+| Available Fees for Reservation     | `$api->getReservationAvailableFees( int $reservationId )`                                          |
+| Collection of Fees for Reservation | `$api->getReservationFeeCollections( int $reservationId )`<br/>*Provides full paged API responses* |
 
 See available query params for `$queryParams` at https://developer.trackhs.com/reference/getreservationnotes
 

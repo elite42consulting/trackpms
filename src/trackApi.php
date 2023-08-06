@@ -7,6 +7,7 @@ use elite42\trackpms\types\account;
 use elite42\trackpms\types\accountingItem;
 use elite42\trackpms\types\amenity;
 use elite42\trackpms\types\amenityGroup;
+use elite42\trackpms\types\availableFee;
 use elite42\trackpms\types\collection\accountCollection;
 use elite42\trackpms\types\collection\accountingItemCollection;
 use elite42\trackpms\types\collection\amenityCollection;
@@ -591,6 +592,35 @@ class trackApi {
 				if( isset( $apiResponse->_embedded?->fees ) ) {
 					foreach( $apiResponse->_embedded?->fees as $reservationFee ) {
 						$reservationFees[] = reservationFee::jsonDeserialize( $reservationFee );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\reservationFee', 500, $e );
+		}
+
+		return $reservationFees;
+	}
+
+	/**
+	 * @param int $reservationId
+	 *
+	 * @return \elite42\trackpms\types\reservationFee[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationAvailableFees( int $reservationId ): array {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/available-fees' );
+
+		/** @var \elite42\trackpms\types\collection\reservationFeeCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$reservationFees = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->availableFees ) ) {
+					foreach( $apiResponse->availableFees as $reservationFee ) {
+						$reservationFees[] = availableFee::jsonDeserialize( $reservationFee );
 					}
 				}
 			}
