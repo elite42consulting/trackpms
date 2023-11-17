@@ -17,7 +17,7 @@
   "require": {
 	"php": ">=8.0",
 	"guzzlehttp/guzzle": "^7.4",
-	"monolog/monolog": "^2.3",
+	"monolog/monolog": "^3.5",
 	"andrewsauder/json-deserialize": "^2.1"
   }
 }
