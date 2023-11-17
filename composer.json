@@ -18,6 +18,6 @@
 	"php": ">=8.0",
 	"guzzlehttp/guzzle": "^7.4",
 	"monolog/monolog": "^3.5",
-	"andrewsauder/json-deserialize": "^2.1"
+	"andrewsauder/json-deserialize": "^v2.5"
   }
 }
