@@ -133,4 +133,34 @@ class reservation
 
 	public ?\elite42\trackpms\types\_envelope\_links                $_links                   = null;
 
+	protected function _afterJsonDeserialize() : void {
+		$easternTimezone = new \DateTimeZone('America/New_York');
+
+		if($this->arrivalDate instanceof \DateTimeInterface && $this->arrivalDate->getTimezone()->getName()!=$easternTimezone->getName()) {
+			$this->arrivalDate = $this->arrivalDate->setTimezone( $easternTimezone );
+		}
+
+		if($this->arrivalTime instanceof \DateTimeInterface && $this->arrivalTime->getTimezone()->getName()!=$easternTimezone->getName()) {
+			$this->arrivalTime = $this->arrivalTime->setTimezone( $easternTimezone );
+		}
+
+		if($this->departureDate instanceof \DateTimeInterface && $this->departureDate->getTimezone()->getName()!=$easternTimezone->getName()) {
+			$this->departureDate = $this->departureDate->setTimezone( $easternTimezone );
+		}
+
+		if($this->departureTime instanceof \DateTimeInterface && $this->departureTime->getTimezone()->getName()!=$easternTimezone->getName()) {
+			$this->departureTime = $this->departureTime->setTimezone( $easternTimezone );
+		}
+	}
+
+	public function getArrivalDateTimeString(): string {
+		$arrivalDateString = $this->arrivalDate?->format('n/j/Y') ?? '';
+		$arrivalTimeString = $this->arrivalTime?->format('g:ia') ?? '';
+		return trim( $arrivalDateString.' '.$arrivalTimeString );
+	}
+	public function getDepartureDateTimeString(): string {
+		$departureDateString = $this->departureDate?->format('n/j/Y') ?? '';
+		$departureTimeString = $this->departureTime?->format('g:ia') ?? '';
+		return trim( $departureDateString.' '.$departureTimeString );
+	}
 }

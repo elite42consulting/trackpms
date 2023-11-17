@@ -201,7 +201,7 @@ class unit
 	public ?\elite42\trackpms\types\_envelope\_links  $_links      = null;
 
 
-	public function ownerNamesToString() {
+	public function ownerNamesToString(): string {
 		$names = [];
 		foreach($this->_embedded->owners as $owner) {
 			$names[] = $owner->name;
@@ -209,7 +209,7 @@ class unit
 		return implode(', ', $names);
 	}
 
-	public function addressToString() {
+	public function addressToString(): string {
 		$addressParts = [];
 		if( !empty( $this->streetAddress ) ) {
 			$addressParts[] = $this->streetAddress;
@@ -233,6 +233,15 @@ class unit
 		}
 
 		return implode( ', ', $addressParts );
+	}
+
+	public function getDefaultHousekeeperUserId(): ?int {
+		foreach($this->roles as $role) {
+			if($role->roleId==1) {
+				return $role->userId;
+			}
+		}
+		return null;
 	}
 
 }

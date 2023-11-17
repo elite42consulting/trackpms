@@ -225,6 +225,17 @@ See available query params for `$queryParams` at https://developer.trackhs.com/r
 
 ---
 
+### Housekeeping Work Orders
+| Fetch            | API Method                                                                                                |
+|------------------|-----------------------------------------------------------------------------------------------------------|
+| One Work Order   | `$api->getHousekeepingWorkOrder( int $housekeepingWorkOrderId )`                                          |
+| Many Work Orders | `$api->getHousekeepingWorkOrders( array $queryParams )`                                                   |
+| Collection       | `$api->getHousekeepingWorkOrderCollections( array $queryParams )`<br/>*Provides full paged API responses* |
+
+See available query params for `$queryParams` at https://developer.trackhs.com/reference/getworkorders
+
+---
+
 ### Owners
 | Fetch            | API Method                                                                                |
 |------------------|-------------------------------------------------------------------------------------------|

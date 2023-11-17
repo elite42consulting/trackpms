@@ -18,6 +18,7 @@ use elite42\trackpms\types\collection\companyCollection;
 use elite42\trackpms\types\collection\contactCollection;
 use elite42\trackpms\types\collection\contractCollection;
 use elite42\trackpms\types\collection\customFieldCollection;
+use elite42\trackpms\types\collection\housekeepingWorkOrderCollection;
 use elite42\trackpms\types\collection\maintenanceWorkOrderCollection;
 use elite42\trackpms\types\collection\ownerCollection;
 use elite42\trackpms\types\collection\ownerTransactionCollection;
@@ -38,6 +39,7 @@ use elite42\trackpms\types\companyAttachment;
 use elite42\trackpms\types\contact;
 use elite42\trackpms\types\contract;
 use elite42\trackpms\types\customField;
+use elite42\trackpms\types\housekeepingWorkOrder;
 use elite42\trackpms\types\itemCategory;
 use elite42\trackpms\types\maintenanceWorkOrder;
 use elite42\trackpms\types\owner;
@@ -2638,5 +2640,82 @@ class trackApi {
 
 
 		return $charges;
+	}
+
+
+
+	/**
+	 * @param int $housekeepingWorkOrderId
+	 *
+	 * @return \elite42\trackpms\types\housekeepingWorkOrder
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getHousekeepingWorkOrder( int $housekeepingWorkOrderId ): housekeepingWorkOrder {
+		$url = $this->buildUrl( '/pms/housekeeping/work-orders/' . $housekeepingWorkOrderId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return housekeepingWorkOrder::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\housekeepingWorkOrder', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getworkorders. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\housekeepingWorkOrder[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getHousekeepingWorkOrders( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/housekeeping/work-orders', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\housekeepingWorkOrderCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$housekeepingWorkOrders = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->workOrders ) ) {
+					foreach( $apiResponse->_embedded?->workOrders as $housekeepingWorkOrder ) {
+						$housekeepingWorkOrders[] = housekeepingWorkOrder::jsonDeserialize( $housekeepingWorkOrder );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\housekeepingWorkOrder', 500, $e );
+		}
+
+		return $housekeepingWorkOrders;
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getworkorders. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\housekeepingWorkOrderCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getHousekeepingWorkOrderCollections( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/housekeeping/work-orders', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$housekeepingWorkOrderCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$housekeepingWorkOrderCollections[] = housekeepingWorkOrderCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\housekeepingWorkOrderCollection', 500, $e );
+			}
+		}
+
+		return $housekeepingWorkOrderCollections;
 	}
 }
