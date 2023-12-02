@@ -36,6 +36,8 @@ class user
 
 	public string                                    $updatedBy  = '';
 
+	public ?\elite42\trackpms\types\user\userEmbedded $_embedded             = null;
+
 	public ?\elite42\trackpms\types\_envelope\_links $_links     = null;
 
 }
