@@ -1,23 +1,23 @@
 {
-  "name": "elite42/trackpms",
-  "description": "PHP SDK library for Track Pulse API",
-  "minimum-stability": "stable",
-  "license": "MIT",
-  "autoload": {
-	"psr-4": {
-	  "elite42\\trackpms\\": "src/"
+	"name": "elite42/trackpms",
+	"description": "PHP SDK library for Track Pulse API",
+	"minimum-stability": "stable",
+	"license": "MIT",
+	"autoload": {
+		"psr-4": {
+			"elite42\\trackpms\\": "src/"
+		}
+	},
+	"authors": [
+		{
+			"name": "Andrew Sauder",
+			"email": "andrew@sauder.email"
+		}
+	],
+	"require": {
+		"php": ">=8.0",
+		"guzzlehttp/guzzle": "^7.4",
+		"monolog/monolog": "^3.5",
+		"andrewsauder/json-deserialize": "^v2.5",
 	}
-  },
-  "authors": [
-	{
-	  "name": "Andrew Sauder",
-	  "email": "andrew@sauder.email"
-	}
-  ],
-  "require": {
-	"php": ">=8.0",
-	"guzzlehttp/guzzle": "^7.4",
-	"monolog/monolog": "^3.5",
-	"andrewsauder/json-deserialize": "^v2.5"
-  }
 }
