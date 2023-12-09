@@ -2750,7 +2750,13 @@ class trackApi {
 	 * @throws \PDOException|\elite42\trackpms\trackException
 	 */
 	public function getJournalLinesForItem( int|array $itemId, \DateTimeImmutable $startDate, \DateTimeImmutable $endDate ): array {
-		$query = "SELECT * FROM journal_lines WHERE item_id=:item_id and txn_date>=:start_date and txn_date<=:end_date;";
+		$cacheKey = (is_array($itemId) ? implode('-', $itemId) : $itemId).$startDate->format('Ymd').$endDate->format('Ymd');
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $cacheKey );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
+		$query = "SELECT journal_lines.*, journal.txn_date FROM journal_lines INNER JOIN journal on journal_lines.journal_id=journal.id WHERE item_id=:item_id and txn_date>=:start_date and txn_date<=:end_date;";
 		$params = [ 'item_id'=>$itemId, 'start_date'=>$startDate->format('Y-m-d'), 'end_date'=>$endDate->setTime(23,59,59)->format('Y-m-d H:i:s') ];
 
 		if(is_array($itemId)) {
@@ -2758,7 +2764,7 @@ class trackApi {
 			foreach($itemId as $id) {
 				$whereIn[] = '?';
 			}
-			$query = "SELECT * FROM journal_lines WHERE txn_date>=? and txn_date<=? and item_id in (".implode(',', $whereIn).");";
+			$query = "SELECT journal_lines.*, journal.txn_date FROM journal_lines INNER JOIN journal on journal_lines.journal_id=journal.id WHERE txn_date>=? and txn_date<=? and item_id in (".implode(',', $whereIn).");";
 			$params = array_merge([$startDate->format('Y-m-d'), $endDate->setTime(23,59,59)->format('Y-m-d H:i:s') ], $itemId);
 		}
 
@@ -2769,22 +2775,25 @@ class trackApi {
 		/** @var \elite42\trackpms\types\journalLine[] $journalLines */
 		$journalLines = $sth->fetchAll( \PDO::FETCH_CLASS, \elite42\trackpms\types\journalLine::class );
 
-		//add journal to each line
-		$journalIds = [];
-		foreach($journalLines as $journalLine) {
-			$journalIds[] = $journalLine->journal_id;
-		}
+		/*if(count($journalLines)>0) {
+			//add journal to each line
+			$journalIds = [];
+			foreach($journalLines as $journalLine) {
+				$journalIds[] = $journalLine->journal_id;
+			}
 
-		$journals = $this->getJournals( $journalIds );
+			$journals = $this->getJournals( $journalIds );
 
-		foreach($journalLines as $journalLine) {
-			foreach($journals as $journal) {
-				if($journal->id==$journalLine->journal_id) {
-					$journalLine->_journal = $journal;
+			foreach($journalLines as $journalLine) {
+				foreach($journals as $journal) {
+					if($journal->id==$journalLine->journal_id) {
+						$journalLine->_journal = $journal;
+					}
 				}
 			}
-		}
+		}*/
 
+		$this->createCacheResponse( __METHOD__, $cacheKey, $journalLines );
 
 		return $journalLines;
 	}
@@ -2798,6 +2807,11 @@ class trackApi {
 	 * @throws \elite42\trackpms\trackException
 	 */
 	public function getJournal( int $id ): \elite42\trackpms\types\journal {
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $id );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
 		$query = "SELECT * FROM journal WHERE id=:id;";
 		$params = [ 'id'=>$id ];
 
@@ -2806,6 +2820,8 @@ class trackApi {
 		$sth->execute( $params );
 		/** @var \elite42\trackpms\types\journal $journal */
 		$journal = $sth->fetch( \PDO::FETCH_CLASS, \elite42\trackpms\types\journal::class );
+
+		$this->createCacheResponse( __METHOD__, $id, $journal );
 
 		return $journal;
 	}
@@ -2819,6 +2835,13 @@ class trackApi {
 	 * @throws \elite42\trackpms\trackException
 	 */
 	public function getJournals( array $ids ): array {
+
+		$cacheKey = implode('-', $ids);
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $cacheKey );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
 		$whereIn = [];
 		foreach($ids as $id) {
 			$whereIn[] = '?';
@@ -2833,6 +2856,8 @@ class trackApi {
 
 		/** @var \elite42\trackpms\types\journal[] $journals */
 		$journals = $sth->fetchAll( \PDO::FETCH_CLASS, \elite42\trackpms\types\journal::class );
+
+		$this->createCacheResponse( __METHOD__, $cacheKey, $journals );
 
 		return $journals;
 	}
