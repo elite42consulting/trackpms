@@ -1,6 +1,6 @@
 <?php
 
-namespace elite42\trackpms\types\owner;
+namespace elite42\trackpms\types\contact;
 
 
 class tag
