@@ -72,7 +72,7 @@ class owner
 
 	public string              $paymentType                 = '';
 
-	/** @var \elite42\trackpms\types\owner\tag[] */
+	/** @var \elite42\trackpms\types\contact\tag[] */
 	public array                                     $tags                   = [];
 
 	public string                                    $taxStreetAddress       = '';
