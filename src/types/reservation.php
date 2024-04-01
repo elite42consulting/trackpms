@@ -129,6 +129,8 @@ class reservation
 
 	public ?\DateTimeImmutable                                      $createdAt                = null;
 
+	public ?\DateTimeImmutable                                      $bookedAt                = null;
+
 	public ?\elite42\trackpms\types\reservation\reservationEmbedded $_embedded                = null;
 
 	public ?\elite42\trackpms\types\_envelope\_links                $_links                   = null;
@@ -151,6 +153,10 @@ class reservation
 		if($this->departureTime instanceof \DateTimeInterface && $this->departureTime->getTimezone()->getName()!=$easternTimezone->getName()) {
 			$this->departureTime = $this->departureTime->setTimezone( $easternTimezone );
 		}
+
+		if($this->bookedAt instanceof \DateTimeInterface && $this->bookedAt->getTimezone()->getName()!=$easternTimezone->getName()) {
+			$this->bookedAt = $this->bookedAt->setTimezone( $easternTimezone );
+		}
 	}
 
 	public function getArrivalDateTimeString(): string {
@@ -162,5 +168,10 @@ class reservation
 		$departureDateString = $this->departureDate?->format('n/j/Y') ?? '';
 		$departureTimeString = $this->departureTime?->format('g:ia') ?? '';
 		return trim( $departureDateString.' '.$departureTimeString );
+	}
+
+	public function getBookedAtTimeString(): string {
+		$bookedAtDateString = $this->bookedAt?->format('n/j/Y') ?? '';
+		return trim( $bookedAtDateString );
 	}
 }
