@@ -57,10 +57,10 @@ class contact
 
 	public bool   $isOwnerContact  = false;
 
-	/** @var \elite42\trackpms\types\contact\tag[] */
+	/** @var \elite42\trackpms\types\contact\tag[] $tags */
 	public array $tags = [];
 
-	/** @var \elite42\trackpms\types\contact\reference[] */
+	/** @var \elite42\trackpms\types\contact\reference[] $references */
 	public array $references = [];
 
 //	public array                                     $custom     = [];
