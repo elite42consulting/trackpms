@@ -29,10 +29,11 @@ use elite42\trackpms\types\collection\reservationNoteCollection;
 use elite42\trackpms\types\collection\reservationTypeCollection;
 use elite42\trackpms\types\collection\roleCollection;
 use elite42\trackpms\types\collection\statementCollection;
+use elite42\trackpms\types\collection\tagCollection;
 use elite42\trackpms\types\collection\transactionCollection;
 use elite42\trackpms\types\collection\unitBlockCollection;
-use elite42\trackpms\types\collection\unitRoleCollection;
 use elite42\trackpms\types\collection\unitCollection;
+use elite42\trackpms\types\collection\unitRoleCollection;
 use elite42\trackpms\types\collection\userCollection;
 use elite42\trackpms\types\company;
 use elite42\trackpms\types\companyAttachment;
@@ -52,14 +53,14 @@ use elite42\trackpms\types\reservationRate;
 use elite42\trackpms\types\reservationType;
 use elite42\trackpms\types\role;
 use elite42\trackpms\types\statement;
+use elite42\trackpms\types\tag;
 use elite42\trackpms\types\transaction;
+use elite42\trackpms\types\unit;
 use elite42\trackpms\types\unitBlock;
 use elite42\trackpms\types\unitPricing;
 use elite42\trackpms\types\unitRole;
-use elite42\trackpms\types\unit;
 use elite42\trackpms\types\user;
 use GuzzleHttp\Exception\GuzzleException;
-
 
 class trackApi {
 
@@ -2742,6 +2743,82 @@ class trackApi {
 		}
 
 		return $housekeepingWorkOrderCollections;
+	}
+
+
+	/**
+	 * @param int $tagId
+	 *
+	 * @return \elite42\trackpms\types\tag
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getTag( int $tagId ): tag {
+		$url = $this->buildUrl( '/tags/' . $tagId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return tag::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\tag', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getworkorders. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\tag[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getTags( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/tags', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\tagCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$tags = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->tags ) ) {
+					foreach( $apiResponse->_embedded?->tags as $tag ) {
+						$tags[] = tag::jsonDeserialize( $tag );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\tag', 500, $e );
+		}
+
+		return $tags;
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getworkorders. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\tagCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getTagCollections( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/tags', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$tagCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$tagCollections[] = tagCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\tagCollection', 500, $e );
+			}
+		}
+
+		return $tagCollections;
 	}
 
 
