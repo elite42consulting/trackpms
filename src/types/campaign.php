@@ -27,7 +27,7 @@ class campaign
 
 	public ?int                                      $primaryNumberId   = null;
 
-	public string                                    $primaryNumber     = '';
+	public                                     $primaryNumber     = '';
 
 	public bool                                      $disableRecording  = false;
 
