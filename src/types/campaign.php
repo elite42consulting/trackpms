@@ -15,7 +15,7 @@ class campaign
 
 	public ?int                                      $brandId           = null;
 
-	public string                                    $brand             = '';
+	public                                           $brand             = null;
 
 	public string                                    $description       = '';
 
