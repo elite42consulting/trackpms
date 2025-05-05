@@ -3016,4 +3016,38 @@ class trackApi {
 
 		return $journals;
 	}
+
+
+	/**
+	 *
+	 * @param int[] $workOrderIds
+	 *
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getWorkOrderJournalCharges( array $workOrderIds ): array {
+
+		$cacheKey = implode('-', $workOrderIds);
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $cacheKey );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
+		$whereIn = [];
+		foreach($workOrderIds as $id) {
+			$whereIn[] = '?';
+		}
+
+		$query = "SELECT * FROM journal_charges WHERE workorder_id in (".implode(',', $whereIn).");";
+		$params = $workOrderIds;
+
+		$pdodb = $this->getPdo();
+		$sth   = $pdodb->prepare( $query );
+		$sth->execute( $params );
+
+		$journalCharges = $sth->fetchAll( \PDO::FETCH_ASSOC );
+
+		$this->createCacheResponse( __METHOD__, $cacheKey, $journalCharges );
+
+		return $journalCharges;
+	}
 }
