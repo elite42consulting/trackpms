@@ -35,6 +35,7 @@ use elite42\trackpms\types\collection\unitBlockCollection;
 use elite42\trackpms\types\collection\unitCollection;
 use elite42\trackpms\types\collection\unitRoleCollection;
 use elite42\trackpms\types\collection\userCollection;
+use elite42\trackpms\types\collection\zoneCollection;
 use elite42\trackpms\types\company;
 use elite42\trackpms\types\companyAttachment;
 use elite42\trackpms\types\contact;
@@ -60,6 +61,7 @@ use elite42\trackpms\types\unitBlock;
 use elite42\trackpms\types\unitPricing;
 use elite42\trackpms\types\unitRole;
 use elite42\trackpms\types\user;
+use elite42\trackpms\types\zone;
 use GuzzleHttp\Exception\GuzzleException;
 
 class trackApi {
@@ -2743,6 +2745,82 @@ class trackApi {
 		}
 
 		return $housekeepingWorkOrderCollections;
+	}
+
+
+	/**
+	 * @param int $housekeepingZoneId
+	 *
+	 * @return \elite42\trackpms\types\zone
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getHousekeepingZone( int $housekeepingZoneId ): zone {
+		$url = $this->buildUrl( '/pms/housekeeping/zones/' . $housekeepingZoneId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return zone::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\housekeepingZone', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/gethousekeepingzonescollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\zone[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getHousekeepingZones( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/housekeeping/zones', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\zoneCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$housekeepingZones = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->zones ) ) {
+					foreach( $apiResponse->_embedded?->zones as $housekeepingZone ) {
+						$housekeepingZones[] = zone::jsonDeserialize( $housekeepingZone );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\housekeepingZone', 500, $e );
+		}
+
+		return $housekeepingZones;
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/gethousekeepingzonescollection. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\zoneCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getHousekeepingZoneCollections( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/housekeeping/zones', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$housekeepingZoneCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$housekeepingZoneCollections[] = zoneCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\housekeepingZoneCollection', 500, $e );
+			}
+		}
+
+		return $housekeepingZoneCollections;
 	}
 
 
