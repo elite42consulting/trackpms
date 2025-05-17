@@ -37,7 +37,7 @@ class campaign
 
 	public ?int                                      $defaultLeadTypeId = null;
 
-	public string                                    $defaultLeadType   = '';
+	public                                     $defaultLeadType   = null;
 
 	public ?\DateTimeImmutable                       $createdAt         = null;
 
