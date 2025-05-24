@@ -198,4 +198,42 @@ class unitCustomFields
 
 	public string $pms_units_minimum_rental_age                                 = '';
 
+	public $pms_units_owners_codes= null;
+	public $pms_units_owners_codes_other= null;
+	public $pms_units_internal_use_only_troubleshooting_guides= null;
+	public $pms_units_policy_opt_outs= null;
+	public $pms_units_channel_opt_outs= null;
+	public $pms_units_coi_expiration_date= null;
+	public $pms_units_hvmi_rejection_reason_s= null;
+	public $pms_units_direct_review_link= null;
+	public $pms_units_direct_memories_link= null;
+	public $pms_units_area_of_lake= null;
+	public $pms_units_promotions= null;
+	public $pms_units_outdoor_camera_s_installed= null;
+	public $pms_units_outdoor_camera_locations= null;
+	public $pms_units_indoor_cameras_installed= null;
+	public $pms_units_indoor_camera_locations= null;
+	public $pms_units_breaker_box_locations_1= null;
+	public $pms_units_annual_free_cleans= null;
+	public $pms_units_annual_free_linens= null;
+	public $pms_units_annual_free_clean_linen_notes= null;
+	public $pms_units_public_sewage_or_septic_system= null;
+	public $pms_units_grill_has_propane_direct_line= null;
+	public $pms_units_home_fuel_on_auto_refill= null;
+	public $pms_units_a_c_type= null;
+	public $pms_units_cable_channel_guide= null;
+	public $pms_units_hot_tub_vendor= null;
+	public $pms_units_hot_tub_filter= null;
+	public $pms_units_pool_filter= null;
+	public $pms_units_ge_waiver_amenity_list= null;
+	public $pms_units_google_map_link= null;
+	public $pms_units_ge_damage= null;
+	public $pms_units_ge_damage_response_date= null;
+	public $pms_units_docs_t_c_link_generic= null;
+	public $pms_units_cxl_policy= null;
+	public $pms_units_custom_t_c_stilwater= null;
+	public $pms_units_maintenance_warnings_portal= null;
+	public $pms_units_pm_receives_check_out_notice= null;
+	public $pms_units_lost_found_form= null;
+
 }
