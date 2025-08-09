@@ -3050,4 +3050,71 @@ class trackApi {
 
 		return $journalCharges;
 	}
+
+
+	/**
+	 *
+	 * @param int|null $unitId
+	 *
+	 * @return \elite42\trackpms\types\reservationChargeTypePerUnit[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationChargeTypesPerUnit( ?int $unitId=null ): array {
+
+		$cacheKey = $unitId ?? 'null';
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $cacheKey );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
+		if(!empty($unitId)) {
+			$query = "SELECT * FROM res_charge_unit_pricing WHERE [unit_id]=:unit_id;";
+			$params = [ 'unit_id'=>$unitId ];
+		}
+		else {
+			$query = "SELECT * FROM res_charge_unit_pricing;";
+			$params = [];
+		}
+
+		$pdodb = $this->getPdo();
+		$sth   = $pdodb->prepare( $query );
+		$sth->execute( $params );
+
+		$reservationChargesPerUnit = $sth->fetchAll( \PDO::FETCH_CLASS, \elite42\trackpms\types\reservationChargeTypePerUnit::class );
+
+		$this->createCacheResponse( __METHOD__, $cacheKey, $reservationChargesPerUnit );
+
+
+
+		return $reservationChargesPerUnit;
+	}
+
+
+	/**
+	 * All items in table [res_charge]
+	 *
+	 * @return \elite42\trackpms\types\reservationChargeType[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationChargeTypes(): array {
+
+		$cacheKey = 'null';
+		$cacheResponse = $this->getCacheResponse( __METHOD__, $cacheKey );
+		if( $cacheResponse!==null ) {
+			return $cacheResponse;
+		}
+
+		$query = "SELECT * FROM res_charge;";
+		$params = [];
+
+		$pdodb = $this->getPdo();
+		$sth   = $pdodb->prepare( $query );
+		$sth->execute( $params );
+
+		$reservationCharges = $sth->fetchAll( \PDO::FETCH_CLASS, types\reservationChargeType::class );
+
+		$this->createCacheResponse( __METHOD__, $cacheKey, $reservationCharges );
+
+		return $reservationCharges;
+	}
 }
