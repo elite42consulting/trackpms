@@ -20,6 +20,7 @@ use elite42\trackpms\types\collection\contractCollection;
 use elite42\trackpms\types\collection\customFieldCollection;
 use elite42\trackpms\types\collection\housekeepingWorkOrderCollection;
 use elite42\trackpms\types\collection\maintenanceWorkOrderCollection;
+use elite42\trackpms\types\collection\nodeCollection;
 use elite42\trackpms\types\collection\ownerCollection;
 use elite42\trackpms\types\collection\ownerTransactionCollection;
 use elite42\trackpms\types\collection\reservationAttachmentCollection;
@@ -44,6 +45,7 @@ use elite42\trackpms\types\customField;
 use elite42\trackpms\types\housekeepingWorkOrder;
 use elite42\trackpms\types\itemCategory;
 use elite42\trackpms\types\maintenanceWorkOrder;
+use elite42\trackpms\types\node;
 use elite42\trackpms\types\owner;
 use elite42\trackpms\types\ownerUnit;
 use elite42\trackpms\types\reservation;
@@ -2897,6 +2899,83 @@ class trackApi {
 		}
 
 		return $tagCollections;
+	}
+
+
+
+	/**
+	 * @param int $nodeId
+	 *
+	 * @return \elite42\trackpms\types\node
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getNode( int $nodeId ): node {
+		$url = $this->buildUrl( '/pms/nodes/' . $nodeId );
+
+		$apiResponse = $this->call( 'GET', $url );
+
+		try {
+			return node::jsonDeserialize( $apiResponse );
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\node', 500, $e );
+		}
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getworkorders. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\node[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getNodes( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/nodes', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\nodeCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$nodes = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->nodes ) ) {
+					foreach( $apiResponse->_embedded?->nodes as $node ) {
+						$nodes[] = node::jsonDeserialize( $node );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\node', 500, $e );
+		}
+
+		return $nodes;
+	}
+
+
+	/**
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getworkorders. Ex: [ 'size'=>100, 'unitId'=>139 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\nodeCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getNodeCollections( array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/nodes', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$nodeCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$nodeCollections[] = nodeCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\nodeCollection', 500, $e );
+			}
+		}
+
+		return $nodeCollections;
 	}
 
 
