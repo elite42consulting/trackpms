@@ -131,8 +131,8 @@ class reservation
 
 	public ?\DateTimeImmutable                                      $bookedAt                = null;
 
-	/** @var \elite42\trackpms\types\reservation\tag[] $tags */
-	public array                                                    $tags                     = [];
+	/** @var \elite42\trackpms\types\reservation\tag[]|null $tags */
+	public ?array                                                   $tags                     = null;
 
 	public ?\elite42\trackpms\types\reservation\reservationEmbedded $_embedded                = null;
 
