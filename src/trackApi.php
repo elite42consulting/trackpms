@@ -799,6 +799,64 @@ class trackApi {
 
 
 	/**
+	 * @param int   $reservationId
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getv1reservationtags. Ex: [ 'size'=>100 ]
+	 *
+	 * @return \elite42\trackpms\types\tag[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationTags( int $reservationId, array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/tags', $queryParams );
+
+		/** @var \elite42\trackpms\types\collection\tagCollection[] $apiResponses */
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$tags = [];
+		try {
+			foreach( $apiResponses as $apiResponse ) {
+				if( isset( $apiResponse->_embedded?->tags ) ) {
+					foreach( $apiResponse->_embedded?->tags as $tag ) {
+						$tags[] = tag::jsonDeserialize( $tag );
+					}
+				}
+			}
+		}
+		catch( jsonDeserializeException $e ) {
+			throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\tag', 500, $e );
+		}
+
+		return $tags;
+	}
+
+
+	/**
+	 * @param int   $reservationId
+	 * @param array $queryParams Key value pairs of track api query params https://developer.trackhs.com/reference/getv1reservationtags. Ex: [ 'size'=>100 ]
+	 *
+	 * @return \elite42\trackpms\types\collection\tagCollection[]
+	 * @throws \elite42\trackpms\trackException
+	 */
+	public function getReservationTagCollections( int $reservationId, array $queryParams = [] ): array {
+		$url = $this->buildUrl( '/pms/reservations/' . $reservationId . '/tags', $queryParams );
+
+		$apiResponses = $this->callAndFollowPaging( 'GET', $url );
+
+		$tagCollections = [];
+
+		foreach( $apiResponses as $apiResponse ) {
+			try {
+				$tagCollections[] = tagCollection::jsonDeserialize( $apiResponse );
+			}
+			catch( jsonDeserializeException $e ) {
+				throw new trackException( 'Failed to convert JSON API response to \elite42\trackpms\types\tagCollection', 500, $e );
+			}
+		}
+
+		return $tagCollections;
+	}
+
+
+	/**
 	 * @param int $amenityId
 	 *
 	 * @return \elite42\trackpms\types\amenity

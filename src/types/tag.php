@@ -16,6 +16,8 @@ class tag
 	public string $description = '';
 	public string $relatedTo = '';
 
+	public ?string $bookingDotComType = null;
+
 	public ?\DateTimeImmutable $createdAt = null;
 
 	public string $createdBy = '';
